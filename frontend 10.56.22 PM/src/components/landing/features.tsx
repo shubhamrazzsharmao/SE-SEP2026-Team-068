@@ -49,7 +49,7 @@ function ScoreRing({ value }: { value: number }) {
 
 export function Features() {
   return (
-    <section id="features" className="bg-paper-hero/40 py-24">
+    <section id="features" className="fade-top bg-tint py-24 [--from:var(--color-paper)]">
       <div className="mx-auto max-w-6xl px-6">
         <p className="text-sm font-semibold uppercase tracking-widest text-brand">{f.eyebrow}</p>
         <h2 className="display mt-3 max-w-3xl text-[clamp(2rem,4vw,3.4rem)]">{f.title}</h2>

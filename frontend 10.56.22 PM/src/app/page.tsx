@@ -5,6 +5,7 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { Features } from "@/components/landing/features";
 import { Audience } from "@/components/landing/audience";
 import { Faq } from "@/components/landing/faq";
+import { CtaFooter } from "@/components/landing/cta-footer";
 
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
       <Features />
       <Audience />
       <Faq />
+      <CtaFooter />
     </main>
   );
 }
