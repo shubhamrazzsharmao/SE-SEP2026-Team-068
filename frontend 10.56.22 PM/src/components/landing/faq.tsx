@@ -4,7 +4,7 @@ const f = site.faq;
 
 export function Faq() {
   return (
-    <section id="faq" className="bg-paper-hero/40 py-24">
+    <section id="faq" className="fade-top bg-tint py-24 [--from:var(--color-paper)]">
       <div className="mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[1fr_1.6fr]">
         <div>
           <p className="text-sm font-semibold uppercase tracking-widest text-brand">{f.eyebrow}</p>

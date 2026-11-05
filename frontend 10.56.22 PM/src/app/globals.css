@@ -191,3 +191,21 @@
     animation: none;
   }
 }
+
+/* Solid colour equal to the old bg-paper-hero/40, so gradients can match it exactly */
+@theme inline {
+  --color-tint: color-mix(in srgb, var(--color-paper-hero) 40%, var(--color-paper));
+}
+
+/* Soft fade at the top of a section. Set the colour of the section above with --from */
+.fade-top {
+  position: relative;
+}
+.fade-top::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 6rem; /* same as py-24, so it never covers the content */
+  background: linear-gradient(to bottom, var(--from), transparent);
+  pointer-events: none;
+}

@@ -97,4 +97,29 @@ export const site = {
       { q: "What happens if I edit a post after it's approved?", a: "It goes straight back to review. Approval is tied to one specific version, so nothing changes silently after sign-off." },
     ],
   },
+    cta: {
+    title: ["Stop repurposing.", "Start approving."],
+    sub: "Turn your next source into a campaign your client signs off in minutes.",
+  },
+  footer: {
+    blurb: "AI campaign planning with human approval built in.",
+    columns: [
+      {
+        title: "Product",
+        links: [
+          { label: "How it works", href: "#how-it-works" },
+          { label: "Features", href: "#features" },
+          { label: "Who it's for", href: "#audience" },
+          { label: "FAQ", href: "#faq" },
+        ],
+      },
+      {
+        title: "Account",
+        links: [
+          { label: "Log in", href: "/login" },
+          { label: "Start creating", href: "/signup" },
+        ],
+      },
+    ],
+  },
 };

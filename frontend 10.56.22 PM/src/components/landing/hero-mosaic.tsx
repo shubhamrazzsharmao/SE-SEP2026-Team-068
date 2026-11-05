@@ -1,13 +1,21 @@
 "use client";
 
+import { useRef, type PointerEvent as ReactPointerEvent } from "react";
 import type { IconType } from "react-icons";
 import { FaLinkedinIn, FaInstagram } from "react-icons/fa6";
 import { LuPenLine, LuMail, LuFileText } from "react-icons/lu";
 
 const COLS = 10;
 const ROWS = 8;
+const FADE_MODE: "corner" | "top" = "corner"; // switch to "top" to compare
 const CENTER = { c: 6, r: 3.5 };
 const RADIUS = 6.5;
+const RIPPLE_RADIUS = 150;
+
+const motionStyle = {
+  transform: "translateY(calc(var(--p, 0) * -8px)) scale(calc(1 + var(--p, 0) * 0.06))",
+  transition: "transform 160ms ease-out, opacity 160ms ease-out",
+};
 
 type Special = { icon: IconType; label: string; text: string; bg: string };
 
@@ -55,8 +63,12 @@ function fillerClass(r: number, c: number) {
 }
 
 function fade(r: number, c: number) {
-  const dist = Math.hypot(c - CENTER.c, r - CENTER.r);
-  return Math.max(0.05, 1 - dist / RADIUS);
+  if (FADE_MODE === "top") {
+    return Math.max(0.06, 1 - Math.pow(r / (ROWS - 1), 1.2));
+  }
+  const dist = Math.hypot(COLS - 1 - c, r);
+  const max = Math.hypot(COLS - 1, ROWS - 1);
+  return Math.max(0.06, 1 - dist / (max * 0.85));
 }
 
 export function HeroMosaic() {
@@ -64,10 +76,37 @@ export function HeroMosaic() {
     r: Math.floor(n / COLS),
     c: n % COLS,
   }));
+  const rootRef = useRef<HTMLDivElement>(null);
+  const frame = useRef<number | null>(null);
+
+  function onPointerMove(e: ReactPointerEvent<HTMLDivElement>) {
+    const { clientX, clientY } = e;
+    cancelAnimationFrame(frame.current ?? 0);
+    frame.current = requestAnimationFrame(() => {
+      const tiles = rootRef.current?.querySelectorAll<HTMLElement>("[data-tile]");
+      tiles?.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        const d = Math.hypot(rect.left + rect.width / 2 - clientX, rect.top + rect.height / 2 - clientY);
+        el.style.setProperty("--p", Math.max(0, 1 - d / RIPPLE_RADIUS).toFixed(3));
+      });
+    });
+  }
+
+  function onPointerLeave() {
+    cancelAnimationFrame(frame.current ?? 0);
+    rootRef.current?.querySelectorAll<HTMLElement>("[data-tile]").forEach((el) => {
+      el.style.setProperty("--p", "0");
+    });
+  }
 
   return (
     <div className="absolute left-[55%] top-1/2 z-0 hidden w-[640px] -translate-x-1/2 -translate-y-1/2 lg:block">
-      <div className="grid grid-cols-10 gap-2">
+      <div
+        ref={rootRef}
+        onPointerMove={onPointerMove}
+        onPointerLeave={onPointerLeave}
+        className="grid grid-cols-10 gap-2"
+      >
         {cells.map(({ r, c }) => {
           const special = specials[`${r}-${c}`];
 
@@ -76,7 +115,9 @@ export function HeroMosaic() {
             return (
               <div
                 key={`${r}-${c}`}
+                data-tile
                 className={`group relative grid aspect-square place-items-center rounded-md text-paper transition-transform duration-200 hover:z-30 hover:-translate-y-1.5 hover:scale-110 ${special.bg}`}
+                style={motionStyle}
               >
                 <Icon size={18} />
                 <div className="pointer-events-none absolute bottom-[115%] left-1/2 z-30 w-48 -translate-x-1/2 rounded-xl bg-ink p-3 text-left text-xs text-paper opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
@@ -90,7 +131,8 @@ export function HeroMosaic() {
           return (
             <div
               key={`${r}-${c}`}
-              style={{ ["--o" as string]: fade(r, c) }}
+              data-tile
+              style={{ ["--o" as string]: fade(r, c), ...motionStyle }}
               className={`aspect-square rounded-md border border-ink/[0.07] transition-all duration-200 [opacity:var(--o)] hover:-translate-y-1 hover:scale-105 hover:bg-brand/40 hover:opacity-100 ${fillerClass(r, c)}`}
             />
           );
@@ -102,19 +144,57 @@ export function HeroMosaic() {
 
 
 
-// "use client";
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// "use client";
+//
 // import { useRef } from "react";
 // import type { IconType } from "react-icons";
 // import { FaLinkedinIn, FaInstagram } from "react-icons/fa6";
 // import { LuPenLine, LuMail, LuFileText } from "react-icons/lu";
-
+//
 // const COLS = 10;
 // const ROWS = 8;
 // const CENTER = { c: 5.5, r: 3.5 };
 // const FADE_RADIUS = 7; // in tiles: bigger = more of the grid stays visible
 // const RIPPLE_RADIUS = 150; // in px: how far the cursor effect reaches
-
+//
 // type Big = {
 //   c: number; // column (0-based)
 //   r: number; // row (0-based)
@@ -126,7 +206,7 @@ export function HeroMosaic() {
 //   text?: string;
 //   tip?: "top" | "bottom";
 // };
-
+//
 // const bigs: Big[] = [
 //   { c: 0, r: 1, w: 2, h: 2, bg: "bg-brown", icon: LuFileText, label: "Your source", text: "One blog, report or transcript goes in." },
 //   { c: 3, r: 0, w: 2, h: 1, bg: "bg-muted", icon: LuMail, label: "Newsletter", text: "Coming soon: long-form summaries.", tip: "bottom" },
@@ -136,7 +216,7 @@ export function HeroMosaic() {
 //   { c: 8, r: 6, w: 2, h: 1, bg: "bg-ink", icon: LuPenLine, label: "Blog article", text: "A long-form piece built from the same facts." },
 //   { c: 1, r: 5, w: 2, h: 1, bg: "bg-ink/70" },
 // ];
-
+//
 // // Cells covered by the big tiles, so fillers skip them
 // const occupied = new Set<string>();
 // bigs.forEach((b) => {
@@ -144,14 +224,14 @@ export function HeroMosaic() {
 //     for (let c = b.c; c < b.c + b.w; c++) occupied.add(`${r}-${c}`);
 //   }
 // });
-
+//
 // const fillers: { r: number; c: number }[] = [];
 // for (let r = 0; r < ROWS; r++) {
 //   for (let c = 0; c < COLS; c++) {
 //     if (!occupied.has(`${r}-${c}`)) fillers.push({ r, c });
 //   }
 // }
-
+//
 // function fillerClass(r: number, c: number) {
 //   const h = (c * 7 + r * 13 + c * r) % 11;
 //   if (h === 0) return "bg-brand/70";
@@ -160,29 +240,29 @@ export function HeroMosaic() {
 //   if (h <= 8) return "bg-ink/[0.05]";
 //   return "bg-white/50";
 // }
-
+//
 // function baseOpacity(r: number, c: number) {
 //   const dist = Math.hypot(c - CENTER.c, r - CENTER.r);
 //   return Math.max(0.06, 1 - dist / FADE_RADIUS);
 // }
-
+//
 // // --p (0 to 1) is set per tile by the pointer handler below
 // const motionStyle = {
 //   transform: "translateY(calc(var(--p, 0) * -8px)) scale(calc(1 + var(--p, 0) * 0.06))",
 //   transition: "transform 160ms ease-out, opacity 160ms ease-out",
 // };
-
+//
 // const tint = (
 //   <span
 //     className="pointer-events-none absolute inset-0 rounded-md bg-brand"
 //     style={{ opacity: "calc(var(--p, 0) * 0.55)" }}
 //   />
 // );
-
+//
 // export function HeroMosaic() {
 //   const rootRef = useRef<HTMLDivElement>(null);
 //   const frame = useRef(0);
-
+//
 //   function onPointerMove(e: React.PointerEvent) {
 //     const { clientX, clientY } = e;
 //     cancelAnimationFrame(frame.current);
@@ -195,14 +275,14 @@ export function HeroMosaic() {
 //       });
 //     });
 //   }
-
+//
 //   function onPointerLeave() {
 //     cancelAnimationFrame(frame.current);
 //     rootRef.current?.querySelectorAll<HTMLElement>("[data-tile]").forEach((el) => {
 //       el.style.setProperty("--p", "0");
 //     });
 //   }
-
+//
 //   return (
 //     <div className="absolute left-[55%] top-1/2 z-0 hidden w-[640px] -translate-x-1/2 -translate-y-1/2 lg:block">
 //       <div
@@ -234,7 +314,7 @@ export function HeroMosaic() {
 //             </div>
 //           );
 //         })}
-
+//
 //         {bigs.map((b, i) => {
 //           const Icon = b.icon;
 //           return (
