@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mosaiq Frontend
 
-## Getting Started
+This is the frontend for the Mosaiq app, built with Next.js.
 
-First, run the development server:
+## Prerequisites
+
+Before running the app, make sure you have:
+
+- Node.js 20+ installed
+- npm installed
+- a terminal open in this project folder
+
+## Install dependencies
+
+From the project root:
+
+```bash
+cd "frontend 10.56.22 PM"
+npm install
+```
+
+## Run the app locally
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
 
-## Learn More
+## Production build
 
-To learn more about Next.js, take a look at the following resources:
+To create a production build:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To run the production build locally:
 
-## Deploy on Vercel
+```bash
+npm run start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Linting
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+```
+
+## Project structure
+
+```text
+src/
+  app/
+  components/
+  lib/
+  types/
+public/
+```
+
+## Main routes
+
+These are the main pages currently available in the frontend:
+
+- `/` — landing page
+- `/onboarding` — onboarding flow
+- `/signup` — signup page
+- `/login` — login page
+- `/brand-setup` — create a new brand profile
+- `/dashboard` — main dashboard
+- `/reviews` — approvals / review queue page
+
+## Notes
+
+- This app uses the Next.js App Router.
+- The project is configured for TypeScript and uses custom app routes under `src/app`.
+- If you change UI code, the dev server will hot reload automatically.
+
+## Troubleshooting
+
+If `npm install` fails, make sure you are inside the frontend folder and not the parent project directory.
+
+Example:
+
+```bash
+cd "/Users/your-name/Downloads/Multi-Platform_AI_Content/frontend 10.56.22 PM"
+```
+
+Then run:
+
+```bash
+npm install
+npm run dev
+```

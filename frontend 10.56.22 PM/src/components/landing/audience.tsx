@@ -4,7 +4,7 @@ const a = site.audience;
 
 export function Audience() {
   return (
-    <section id="audience" className="bg-paper py-24">
+    <section id="audience" className="fade-top bg-paper py-24 [--from:var(--color-tint)]">
       <div className="mx-auto max-w-6xl px-6">
         <p className="text-sm font-semibold uppercase tracking-widest text-brand">{a.eyebrow}</p>
         <h2 className="display mt-3 max-w-3xl text-[clamp(2rem,4vw,3.4rem)]">{a.title}</h2>
