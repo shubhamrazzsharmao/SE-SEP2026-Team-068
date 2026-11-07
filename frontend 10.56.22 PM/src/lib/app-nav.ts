@@ -1,13 +1,14 @@
 import type { IconType } from "react-icons";
 import {
   LuLayoutDashboard, LuUsers, LuFolderKanban, LuCalendarDays,
-  LuClipboardCheck, LuLightbulb, LuLibrary, LuSettings, LuLifeBuoy,
+  LuClipboardCheck, LuLightbulb, LuLibrary, LuSettings, LuLifeBuoy, LuPlus,
 } from "react-icons/lu";
 
 export type NavItem = { label: string; href: string; icon: IconType; badge?: "reviews" };
 
 export const mainNav: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LuLayoutDashboard },
+  { label: "Brand setup", href: "/brand-setup", icon: LuPlus },
   { label: "Clients", href: "/clients", icon: LuUsers },
   { label: "Campaigns", href: "/campaigns", icon: LuFolderKanban },
   { label: "Calendar", href: "/calendar", icon: LuCalendarDays },
