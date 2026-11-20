@@ -1,0 +1,37 @@
+Below is the campaign context, followed by the source document split into chunks. Extract the information described and return it as JSON.
+
+=== CAMPAIGN CONTEXT ===
+{{CAMPAIGN_CONTEXT}}
+
+=== SOURCE DOCUMENT CHUNKS ===
+{{CHUNKS}}
+
+=== WHAT TO EXTRACT ===
+- key_messages: 3 to 6 core ideas this campaign should communicate, based on the document and the campaign goals. Each is one clear sentence.
+- facts: all specific, checkable facts from the document that could be useful in posts (aim for 15 to 30, covering product, pricing, dates, company, sustainability, customers, positioning).
+- audience: who the campaign targets, plus insights about them that the document supports.
+- angles: 3 to 6 possible story directions for the campaign (for example a theme or a way of framing the product), with one sentence on why each fits.
+- restrictions: anything the document says must NOT be claimed or done in marketing.
+
+=== OUTPUT FORMAT (JSON only) ===
+{
+  "key_messages": [
+    {"id": "m1", "text": "..."}
+  ],
+  "facts": [
+    {"id": "f1", "text": "...", "category": "product|pricing|dates|company|sustainability|customers|positioning|other",
+     "source_chunk": "<chunk id>", "evidence": "<exact words copied from that chunk>"}
+  ],
+  "audience": {
+    "description": "...",
+    "insights": [
+      {"text": "...", "source_chunk": "<chunk id>", "evidence": "<exact words copied from that chunk>"}
+    ]
+  },
+  "angles": [
+    {"id": "a1", "name": "...", "why": "..."}
+  ],
+  "restrictions": [
+    {"text": "...", "source_chunk": "<chunk id>", "evidence": "<exact words copied from that chunk>"}
+  ]
+}

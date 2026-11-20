@@ -1,0 +1,31 @@
+Propose the posting schedule for this campaign.
+
+=== CAMPAIGN ===
+{{CAMPAIGN_CONTEXT}}
+
+=== MAXIMUM TOTAL POSTS ===
+{{MAX_POSTS}}
+
+=== PLATFORMS AND THEIR ALLOWED LENGTHS ===
+{{PLATFORM_LENGTHS}}
+
+=== KEY DATES ===
+{{KEY_DATES}}
+
+=== AVAILABLE DATES (use only these) ===
+{{AVAILABLE_DATES}}
+
+{{FEEDBACK_BLOCK}}
+
+=== OUTPUT FORMAT (JSON only) ===
+{
+  "summary": "One or two sentences explaining the schedule.",
+  "platforms": {
+    "<platform name>": {
+      "length": "<one of that platform's allowed lengths>",
+      "dates": ["YYYY-MM-DD", "YYYY-MM-DD"],
+      "reason": "One short sentence on why this platform gets this many posts."
+    }
+  }
+}
+Include only platforms that get at least one post.
