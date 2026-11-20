@@ -2,11 +2,12 @@ import Link from "next/link";
 import type { DashboardData } from "@/types/app";
 
 export function StatCards({ stats }: { stats: DashboardData["stats"] }) {
+  const pct = stats.total ? (stats.approved / stats.total) * 100 : 0;
   const items = [
-    { label: "Approved", value: stats.approved, sub: `of ${stats.total} posts`, dot: "bg-green-500", pct: (stats.approved / stats.total) * 100 },
-    { label: "In review", value: stats.inReview, sub: "waiting on feedback", dot: "bg-blue-500" },
-    { label: "Changes requested", value: stats.changesRequested, sub: "need a revision", dot: "bg-amber-500" },
-    { label: "Plans to approve", value: stats.plansToApprove, sub: "block post generation", dot: "bg-purple-500" },
+    { label: "Approved", value: stats.approved, sub: `of ${stats.total} posts`, dot: "bg-green-500", pct },
+    { label: "Pending review", value: stats.pending_review, sub: "waiting on a reviewer", dot: "bg-blue-500" },
+    { label: "Rejected", value: stats.rejected, sub: "closed with a reason", dot: "bg-red-500" },
+    { label: "Drafts", value: stats.draft, sub: "not sent for review", dot: "bg-slate-400" },
   ];
 
   return (

@@ -5,7 +5,7 @@ const dot: Record<ActivityItem["kind"], string> = {
   approved: "bg-green-500",
   generated: "bg-brand",
   changes: "bg-amber-500",
-  plan: "bg-purple-500",
+  other: "bg-slate-400",
 };
 
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
@@ -14,7 +14,7 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
       <h2 className="text-lg font-semibold">Recent activity</h2>
       {items.length === 0 ? (
         <div className="mt-4">
-          <EmptyState title="Nothing yet" text="Every comment, version and approval shows up here." />
+          <EmptyState title="Nothing yet" text="Activity from campaigns you own shows up here." />
         </div>
       ) : (
         <ol className="mt-5 space-y-5 border-l-2 border-line pl-5">

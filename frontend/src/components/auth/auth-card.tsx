@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import type { Provider } from "@supabase/supabase-js";
+import { logAuthEvent } from "@/lib/auth-log";
+import { createClient } from "@/lib/supabase/client";
 import { AuthMosaic } from "./auth-mosaic";
 
 type Mode = "login" | "signup";
@@ -21,11 +25,31 @@ function MosaiqMark({ size = 28 }: { size?: number }) {
   );
 }
 
-function SocialButton({ label, children }: { label: string; children: React.ReactNode }) {
+const callbackUrl = () => `${window.location.origin}/auth/callback`;
+
+async function signInWith(provider: Provider) {
+  // Needs the provider enabled in Supabase -> Authentication -> Sign In / Providers.
+  return createClient().auth.signInWithOAuth({ provider, options: { redirectTo: callbackUrl() } });
+}
+
+function SocialButton({ label, provider, onError, children }: {
+  label: string;
+  provider: Provider;
+  onError: (msg: string) => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
       aria-label={label}
+      title={label}
+      onClick={async () => {
+        const { error } = await signInWith(provider);
+        if (error) {
+          void logAuthEvent("login_failed", { reason: error.message, method: provider });
+          onError(error.message);
+        }
+      }}
       className="flex h-11 w-11 items-center justify-center rounded-full border border-[#E6DCCD] bg-white text-[#251A14] transition hover:-translate-y-0.5 hover:border-[#251A14]"
     >
       {children}
@@ -60,16 +84,33 @@ function SubmitButton({ children, loading }: { children: React.ReactNode; loadin
   );
 }
 
+function Message({ error, info }: { error: string | null; info?: string | null }) {
+  if (error) return <p role="alert" className="rounded-2xl bg-red-50 px-4 py-2.5 text-center text-[13px] text-red-700">{error}</p>;
+  if (info) return <p role="status" className="rounded-2xl bg-green-50 px-4 py-2.5 text-center text-[13px] text-green-800">{info}</p>;
+  return null;
+}
+
 function LoginForm() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     const data = new FormData(e.currentTarget);
-    // TODO: call your auth API here.
-    console.log("login", Object.fromEntries(data));
-    setTimeout(() => setLoading(false), 600);
+    const email = String(data.get("email"));
+    const { error } = await createClient().auth.signInWithPassword({ email, password: String(data.get("password")) });
+    if (error) {
+      void logAuthEvent("login_failed", { email, reason: error.message, method: "password" });
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+    await logAuthEvent("login", { method: "password" });
+    router.replace("/dashboard");
+    router.refresh();
   }
 
   return (
@@ -81,10 +122,10 @@ function LoginForm() {
         Your campaigns and approvals are right where you left them.
       </p>
       <div className="flex justify-center gap-3 pb-2">
-        <SocialButton label="Continue with Google">
+        <SocialButton label="Continue with Google" provider="google" onError={setError}>
           <span className="text-[15px] font-bold">G</span>
         </SocialButton>
-        <SocialButton label="Continue with LinkedIn">
+        <SocialButton label="Continue with LinkedIn" provider="linkedin_oidc" onError={setError}>
           <span className="text-[14px] font-extrabold">in</span>
         </SocialButton>
       </div>
@@ -96,21 +137,45 @@ function LoginForm() {
           Forgot your password?
         </Link>
       </div>
+      <Message error={error} />
       <SubmitButton loading={loading}>Log in</SubmitButton>
     </form>
   );
 }
 
 function SignupForm() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    const data = new FormData(e.currentTarget);
-    // TODO: call your auth API here.
-    console.log("signup", Object.fromEntries(data));
-    setTimeout(() => setLoading(false), 600);
+    setError(null);
+    setInfo(null);
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    const email = String(data.get("email"));
+    const { data: res, error } = await createClient().auth.signUp({
+      email,
+      password: String(data.get("password")),
+      // The backend reads user_metadata.full_name when it creates the profile row.
+      options: { data: { full_name: String(data.get("name")).trim() }, emailRedirectTo: callbackUrl() },
+    });
+    setLoading(false);
+    if (error) {
+      void logAuthEvent("signup_failed", { email, reason: error.message });
+      return setError(error.message);
+    }
+    await logAuthEvent("signup", { email, method: res.session ? "signed in" : "awaiting email confirmation" });
+    if (res.session) {
+      router.replace("/dashboard");
+      router.refresh();
+      return;
+    }
+    form.reset();
+    setInfo("Check your inbox and click the confirmation link to finish signing up.");
   }
 
   return (
@@ -122,10 +187,10 @@ function SignupForm() {
         One source in. A whole campaign out.
       </p>
       <div className="flex justify-center gap-3 pb-2">
-        <SocialButton label="Sign up with Google">
+        <SocialButton label="Sign up with Google" provider="google" onError={setError}>
           <span className="text-[15px] font-bold">G</span>
         </SocialButton>
-        <SocialButton label="Sign up with LinkedIn">
+        <SocialButton label="Sign up with LinkedIn" provider="linkedin_oidc" onError={setError}>
           <span className="text-[14px] font-extrabold">in</span>
         </SocialButton>
       </div>
@@ -133,6 +198,7 @@ function SignupForm() {
       <Field id="signup-name" name="name" type="text" label="Full name" autoComplete="name" required />
       <Field id="signup-email" name="email" type="email" label="Work email" autoComplete="email" required />
       <Field id="signup-password" name="password" type="password" label="Password (8+ characters)" autoComplete="new-password" minLength={8} required />
+      <Message error={error} info={info} />
       <SubmitButton loading={loading}>Create account</SubmitButton>
       <p className="pt-1 text-center text-[12px] text-[#8A7B6D]">
         By signing up you agree to our{" "}

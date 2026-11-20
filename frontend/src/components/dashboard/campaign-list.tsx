@@ -1,23 +1,33 @@
 import Link from "next/link";
 import { LuPlus } from "react-icons/lu";
 import type { Campaign, Stage } from "@/types/app";
+import type { MemberRole } from "@/types/api";
+
+const roleLabel: Record<MemberRole, string> = {
+  owner: "Owner",
+  creator: "Creator",
+  reviewer: "Reviewer",
+  brand_manager: "Brand manager",
+};
 
 const stageCls: Record<Stage, string> = {
-  Planning: "bg-slate-100 text-slate-700",
-  Generating: "bg-brand/10 text-brand",
+  "Not started": "bg-slate-100 text-slate-700",
   "In review": "bg-blue-100 text-blue-700",
   Complete: "bg-green-100 text-green-700",
 };
 
-export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
+// heading={null} hides the title row (used on the /campaigns page itself).
+export function CampaignList({ campaigns, heading = "Active campaigns" }: { campaigns: Campaign[]; heading?: string | null }) {
   return (
     <section>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Active campaigns</h2>
-        <Link href="/campaigns" className="text-sm font-semibold text-brand hover:underline">
-          View all
-        </Link>
-      </div>
+      {heading && (
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">{heading}</h2>
+          <Link href="/campaigns" className="text-sm font-semibold text-brand hover:underline">
+            View all
+          </Link>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         {campaigns.map((c) => (
@@ -35,10 +45,10 @@ export function CampaignList({ campaigns }: { campaigns: Campaign[] }) {
               <span>
                 {c.approved} of {c.total} approved
               </span>
-              <span>Due {c.due}</span>
+              <span>{roleLabel[c.myRole]}</span>
             </div>
             <div className="mt-2 h-2 rounded-full bg-line">
-              <div className="h-2 rounded-full bg-brand" style={{ width: `${(c.approved / c.total) * 100}%` }} />
+              <div className="h-2 rounded-full bg-brand" style={{ width: `${c.total ? (c.approved / c.total) * 100 : 0}%` }} />
             </div>
           </Link>
         ))}
