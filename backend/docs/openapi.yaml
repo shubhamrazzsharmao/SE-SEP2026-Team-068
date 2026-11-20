@@ -1,0 +1,2657 @@
+openapi: 3.1.0
+info:
+  title: ContentFlow API
+  description: '
+
+    Backend for **ContentFlow** (Team 068): AI-assisted multi-channel content generation with a
+
+    human-in-the-loop review workflow.
+
+
+    **Authentication.** Users sign in with Supabase Auth in the frontend; every call (except
+
+    `/health`) sends `Authorization: Bearer <access_token>`.
+
+
+    **Authorisation.** Roles are per campaign: `owner`, `creator`, `reviewer`, `brand_manager`.
+
+    Non-members get `404` (campaigns are invisible to outsiders); members whose role does not allow
+
+    an action get `403`.
+
+
+    **Errors.** Every error has the shape `{"detail": "...", "code": "..."}`; validation errors add
+
+    an `errors` list; a failed AI call adds `job_id`.
+
+
+    **Status flow.** `pending_review` -> `approved` | `rejected` (final) | `pending_review` with a new
+
+    version after *request changes*. Versions are append-only. Nothing is published automatically.
+
+    '
+  version: 1.0.0-sprint1
+paths:
+  /api/v1/me:
+    get:
+      tags:
+      - Account
+      summary: Get Me
+      description: 'Return the signed-in user''s profile.
+
+
+        Users sign up and log in through Supabase Auth in the frontend. The first authenticated
+
+        call creates the matching profile row (name and email are taken from the token), so
+
+        the frontend should call this once after login. A user must have done so before a
+
+        campaign owner can add them by email.
+
+
+        **User stories:** US11 (access is organised per user).'
+      operationId: get_me_api_v1_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - BearerAuth: []
+      x-user-stories:
+      - US11
+  /api/v1/brands:
+    get:
+      tags:
+      - Brands
+      summary: List Brands
+      description: 'List brands the caller owns or can see through a campaign membership.
+
+
+        **User stories:** US5, US11.'
+      operationId: list_brands_api_v1_brands_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/BrandOut'
+                type: array
+                title: Response List Brands Api V1 Brands Get
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - BearerAuth: []
+      x-user-stories:
+      - US5
+      - US11
+    post:
+      tags:
+      - Brands
+      summary: Create Brand
+      description: 'Create a brand (the client and its voice): tone, preferred terms and terms to avoid.
+
+
+        The caller becomes the brand owner. Brand names are unique per owner.
+
+
+        **User stories:** US5 (define brand guidelines), US11 (client -> campaign hierarchy).'
+      operationId: create_brand_api_v1_brands_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrandIn'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict with the current state (duplicate, locked brief, invalid status transition,
+            stale version).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - BearerAuth: []
+      x-user-stories:
+      - US5
+      - US11
+  /api/v1/brands/{brand_id}:
+    get:
+      tags:
+      - Brands
+      summary: Get Brand
+      description: 'Get one brand. Returns 404 if the caller neither owns it nor belongs to a campaign
+        that uses it.
+
+
+        **User stories:** US5.'
+      operationId: get_brand_api_v1_brands__brand_id__get
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: brand_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Brand Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US5
+    patch:
+      tags:
+      - Brands
+      summary: Update Brand
+      description: 'Edit brand guidelines. Allowed for the brand owner and for a `brand_manager` of a
+
+        campaign that uses the brand.
+
+
+        Changes apply only to content generated afterwards; existing versions are untouched.
+
+
+        **User stories:** US5 (define brand guidelines).'
+      operationId: update_brand_api_v1_brands__brand_id__patch
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: brand_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Brand Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrandUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict with the current state (duplicate, locked brief, invalid status transition,
+            stale version).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US5
+  /api/v1/campaigns:
+    get:
+      tags:
+      - Campaigns & members
+      summary: List Campaigns
+      description: 'List the campaigns the caller belongs to, with the caller''s role in each.
+
+        Users only ever see their own campaigns.
+
+
+        **User stories:** US11.'
+      operationId: list_campaigns_api_v1_campaigns_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CampaignOut'
+                type: array
+                title: Response List Campaigns Api V1 Campaigns Get
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - BearerAuth: []
+      x-user-stories:
+      - US11
+    post:
+      tags:
+      - Campaigns & members
+      summary: Create Campaign
+      description: 'Create a campaign under one of the caller''s brands. The caller is added as `owner`.
+
+
+        **User stories:** US11 (organise content by client and campaign).'
+      operationId: create_campaign_api_v1_campaigns_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignIn'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - BearerAuth: []
+      x-user-stories:
+      - US11
+  /api/v1/campaigns/{campaign_id}:
+    get:
+      tags:
+      - Campaigns & members
+      summary: Get Campaign
+      description: 'Get one campaign. Non-members receive 404.
+
+
+        **User stories:** US11.'
+      operationId: get_campaign_api_v1_campaigns__campaign_id__get
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: campaign_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Campaign Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US11
+  /api/v1/campaigns/{campaign_id}/members:
+    post:
+      tags:
+      - Campaigns & members
+      summary: Add Member
+      description: 'Add a user to the campaign with one role (`owner`, `creator`, `reviewer`, `brand_manager`).
+
+
+        Owner only. The person must have signed in at least once (see `GET /me`). One role per user
+
+        per campaign.
+
+
+        **User stories:** US11, US6 (reviewers must be added before they can review).'
+      operationId: add_member_api_v1_campaigns__campaign_id__members_post
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: campaign_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Campaign Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberIn'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict with the current state (duplicate, locked brief, invalid status transition,
+            stale version).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US11
+    get:
+      tags:
+      - Campaigns & members
+      summary: List Members
+      description: 'List campaign members and their roles. Any member can see the list.
+
+
+        **User stories:** US11.'
+      operationId: list_members_api_v1_campaigns__campaign_id__members_get
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: campaign_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Campaign Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MemberOut'
+                title: Response List Members Api V1 Campaigns  Campaign Id  Members Get
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US11
+  /api/v1/campaigns/{campaign_id}/members/{user_id}:
+    delete:
+      tags:
+      - Campaigns & members
+      summary: Remove Member
+      description: 'Remove a member. Owner only. A campaign always keeps at least one owner (409 otherwise).
+
+        Content the member created stays in place.
+
+
+        **User stories:** US11.'
+      operationId: remove_member_api_v1_campaigns__campaign_id__members__user_id__delete
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: campaign_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Campaign Id
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: User Id
+      responses:
+        '204':
+          description: Successful Response
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict with the current state (duplicate, locked brief, invalid status transition,
+            stale version).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US11
+  /api/v1/campaigns/{campaign_id}/activity:
+    get:
+      tags:
+      - Campaigns & members
+      summary: Campaign Activity
+      description: 'Read-only audit log for the whole campaign, newest first: who created, edited,
+
+        regenerated, approved or rejected what.
+
+
+        Visible to campaign owners and to global admins (admins need not be members).
+
+
+        **User stories:** US13 (view an activity log).'
+      operationId: campaign_activity_api_v1_campaigns__campaign_id__activity_get
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: campaign_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Campaign Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityOut'
+                title: Response Campaign Activity Api V1 Campaigns  Campaign Id  Activity Get
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US13
+  /api/v1/campaigns/{campaign_id}/briefs:
+    post:
+      tags:
+      - Briefs & generation
+      summary: Create Brief
+      description: 'Create a brief: topic, objective and platforms are required; audience, key messages
+
+        and a tone override are optional. Without an override the brand tone is used
+
+        (`effective_tone`).
+
+
+        Roles: `owner`, `creator`.
+
+
+        **User stories:** US1 (submit a campaign brief), US3.'
+      operationId: create_brief_api_v1_campaigns__campaign_id__briefs_post
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: campaign_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Campaign Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BriefIn'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US1
+      - US3
+    get:
+      tags:
+      - Briefs & generation
+      summary: List Briefs
+      description: 'List the briefs of a campaign (any member).
+
+
+        **User stories:** US1, US11.'
+      operationId: list_briefs_api_v1_campaigns__campaign_id__briefs_get
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: campaign_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Campaign Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BriefOut'
+                title: Response List Briefs Api V1 Campaigns  Campaign Id  Briefs Get
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US1
+      - US11
+  /api/v1/briefs/{brief_id}:
+    get:
+      tags:
+      - Briefs & generation
+      summary: Get Brief
+      description: 'Get one brief (any member of its campaign).
+
+
+        **User stories:** US1, US6 (reviewers read the brief next to the content).'
+      operationId: get_brief_api_v1_briefs__brief_id__get
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: brief_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Brief Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US1
+      - US6
+    patch:
+      tags:
+      - Briefs & generation
+      summary: Update Brief
+      description: 'Edit a saved brief. Only possible while the brief is still `draft`; once generation
+
+        has started it is locked (409 `BRIEF_LOCKED`).
+
+
+        Roles: `owner`, `creator`.
+
+
+        **User stories:** US1.'
+      operationId: update_brief_api_v1_briefs__brief_id__patch
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: brief_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Brief Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BriefUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict with the current state (duplicate, locked brief, invalid status transition,
+            stale version).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US1
+  /api/v1/briefs/{brief_id}/generate:
+    post:
+      tags:
+      - Briefs & generation
+      summary: Generate
+      description: 'Generate one content piece per platform in the brief, using the brief and the brand
+
+        guidelines (tone, preferred and avoided terms).
+
+
+        Every piece is saved as version 1 (`ai_generated`) with status `pending_review`. Nothing
+
+        is ever published or approved automatically. Generation is all-or-nothing: if the AI
+
+        provider fails for any platform, **no** piece is saved, the job is recorded as `failed`,
+
+        the brief returns to `draft`, and the call returns 502 so the user can retry.
+
+
+        Roles: `owner`, `creator`. A brief can be generated once (409 afterwards).
+
+
+        **User stories:** US3 (generate platform-specific content from one brief), US6.'
+      operationId: generate_api_v1_briefs__brief_id__generate_post
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: brief_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Brief Id
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict with the current state (duplicate, locked brief, invalid status transition,
+            stale version).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: The AI provider failed. Nothing was saved; the request can be retried.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US3
+      - US6
+  /api/v1/campaigns/{campaign_id}/content:
+    get:
+      tags:
+      - Content
+      summary: List Content
+      description: 'List the content pieces of a campaign, newest first, with their current version.
+
+
+        Use `?status=pending_review` for the reviewer''s pending list and `?status=...` to
+
+        track progress. Deleted pieces are never listed. Any campaign member can read.
+
+
+        **User stories:** US6 (list pending content), US10 (track status and filter).'
+      operationId: list_content_api_v1_campaigns__campaign_id__content_get
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: campaign_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Campaign Id
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - $ref: '#/components/schemas/ContentStatus'
+          - type: 'null'
+          description: Filter by status.
+          title: Status
+        description: Filter by status.
+      - name: platform
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - $ref: '#/components/schemas/Platform'
+          - type: 'null'
+          description: Filter by platform.
+          title: Platform
+        description: Filter by platform.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentPieceOut'
+                title: Response List Content Api V1 Campaigns  Campaign Id  Content Get
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US6
+      - US10
+  /api/v1/content/{piece_id}:
+    get:
+      tags:
+      - Content
+      summary: Get Content
+      description: 'One piece with its brief, every version and every review decision, so a reviewer sees
+
+        the content next to its brief and a creator can read the rejection reason.
+
+
+        **User stories:** US6, US8 (creator reads the reason), US10.'
+      operationId: get_content_api_v1_content__piece_id__get
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: piece_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Piece Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentPieceDetail'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US6
+      - US8
+      - US10
+    patch:
+      tags:
+      - Content
+      summary: Edit Content
+      description: 'Edit the text. Saves a **new** `human_edit` version (older versions are kept) and
+        puts
+
+        the piece back to `pending_review`, so an edited approved piece needs approval again.
+
+        Rejected pieces are final (409).
+
+
+        Roles: `owner`, `creator`, `reviewer`. A reviewer who edited a version cannot approve it.
+
+
+        **User stories:** US6 (review and edit), US13 (edits are logged).'
+      operationId: edit_content_api_v1_content__piece_id__patch
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: piece_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Piece Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentPieceOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict with the current state (duplicate, locked brief, invalid status transition,
+            stale version).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US6
+      - US13
+    delete:
+      tags:
+      - Content
+      summary: Delete Content
+      description: 'Delete a piece after a confirmation step: without `?confirm=true` the call is rejected
+
+        (400 `CONFIRMATION_REQUIRED`). The piece is hidden, not erased - its versions, reviews and
+
+        activity log stay in the database.
+
+
+        Roles: `owner`, `creator`.
+
+
+        **User stories:** US11, US13 (the deletion is logged).'
+      operationId: delete_content_api_v1_content__piece_id__delete
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: piece_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Piece Id
+      - name: confirm
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Must be true to confirm the deletion.
+          default: false
+          title: Confirm
+        description: Must be true to confirm the deletion.
+      responses:
+        '204':
+          description: Successful Response
+        '400':
+          description: Bad request (e.g. a required confirmation is missing).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US11
+      - US13
+  /api/v1/content/{piece_id}/versions:
+    get:
+      tags:
+      - Content
+      summary: List Versions
+      description: 'Version history, oldest first. Versions are append-only and never deleted.
+
+
+        **User stories:** US9, US13.'
+      operationId: list_versions_api_v1_content__piece_id__versions_get
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: piece_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Piece Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VersionOut'
+                title: Response List Versions Api V1 Content  Piece Id  Versions Get
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US9
+      - US13
+  /api/v1/content/{piece_id}/comments:
+    get:
+      tags:
+      - Content
+      summary: List Comments
+      description: 'Discussion thread of a piece, oldest first (any member).
+
+
+        **User stories:** US6, US8 (reviewer and creator can talk about a piece).'
+      operationId: list_comments_api_v1_content__piece_id__comments_get
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: piece_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Piece Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommentOut'
+                title: Response List Comments Api V1 Content  Piece Id  Comments Get
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US6
+      - US8
+    post:
+      tags:
+      - Content
+      summary: Add Comment
+      description: 'Add a comment to a piece. Any campaign member can comment, whatever their role.
+
+
+        **User stories:** US6, US8.'
+      operationId: add_comment_api_v1_content__piece_id__comments_post
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: piece_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Piece Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentIn'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US6
+      - US8
+  /api/v1/content/{piece_id}/activity:
+    get:
+      tags:
+      - Content
+      summary: Piece Activity
+      description: 'Read-only activity log of one piece (user, action, version, timestamp), oldest first.
+
+        There is no endpoint that updates or deletes log entries.
+
+
+        **User stories:** US13 (view an activity log).'
+      operationId: piece_activity_api_v1_content__piece_id__activity_get
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: piece_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Piece Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityOut'
+                title: Response Piece Activity Api V1 Content  Piece Id  Activity Get
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body, query or path parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US13
+  /api/v1/content/{piece_id}/approve:
+    post:
+      tags:
+      - Review (human in the loop)
+      summary: Approve
+      description: 'Approve a piece that is `pending_review`. The reviewer and timestamp are recorded.
+
+        Approval does **not** publish anything.
+
+
+        Roles: `reviewer` only (any other role gets 403). A reviewer cannot approve content they
+
+        created or edited (403 `SELF_REVIEW_FORBIDDEN`). If `version_no` is sent and is no longer the
+
+        current version, the call fails with 409 `STALE_VERSION`.
+
+
+        **User stories:** US7 (approve content).'
+      operationId: approve_api_v1_content__piece_id__approve_post
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: piece_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Piece Id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApproveIn'
+              default: {}
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentPieceOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict with the current state (duplicate, locked brief, invalid status transition,
+            stale version).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US7
+  /api/v1/content/{piece_id}/reject:
+    post:
+      tags:
+      - Review (human in the loop)
+      summary: Reject
+      description: 'Reject a `pending_review` piece with a mandatory reason (at least 10 characters).
+
+
+        Rejection is **final**: the piece stays in history and can no longer be approved, edited or
+
+        regenerated. The creator reads the reason in `rejection_reason`.
+
+
+        Roles: `reviewer` only. Same self-review and stale-version guards as approve.
+
+
+        **User stories:** US8 (reject content with a reason).'
+      operationId: reject_api_v1_content__piece_id__reject_post
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: piece_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Piece Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentPieceOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict with the current state (duplicate, locked brief, invalid status transition,
+            stale version).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US8
+  /api/v1/content/{piece_id}/request-changes:
+    post:
+      tags:
+      - Review (human in the loop)
+      summary: Request Changes
+      description: 'Ask for changes with a short feedback note (at least 5 characters).
+
+
+        Produces exactly **one** revised version of **this piece only** (origin `regeneration`) and
+
+        returns the piece to `pending_review`. Earlier versions are kept. If the AI provider
+
+        fails, nothing is saved and the call returns 502.
+
+
+        Roles: `reviewer` only. Same self-review and stale-version guards as approve.
+
+
+        **User stories:** US9 (request changes of a piece).'
+      operationId: request_changes_api_v1_content__piece_id__request_changes_post
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: piece_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Piece Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestChangesIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentPieceOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authenticated, but the campaign role does not allow this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource does not exist, or the caller is not a member of its campaign.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict with the current state (duplicate, locked brief, invalid status transition,
+            stale version).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request body or parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: The AI provider failed. Nothing was saved; the request can be retried.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-user-stories:
+      - US9
+  /api/v1/dashboard:
+    get:
+      tags:
+      - Dashboard
+      summary: Dashboard
+      description: 'Counts of draft / pending-review / approved / rejected pieces, in total and per campaign,
+
+        over the campaigns the caller belongs to. The dashboard is the same for every role.
+
+
+        **User stories:** US10 (track status), US6 (reviewers see what is pending).'
+      operationId: dashboard_api_v1_dashboard_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardOut'
+        '401':
+          description: Missing, malformed, expired or forged bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - BearerAuth: []
+      x-user-stories:
+      - US10
+      - US6
+  /api/v1/health:
+    get:
+      tags:
+      - Dashboard
+      summary: Liveness and database connectivity check (no auth)
+      description: 'Returns `database: true` when the backend can reach Postgres. Use it to verify the
+
+        Supabase connection string.'
+      operationId: health_api_v1_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthOut'
+components:
+  schemas:
+    ActivityOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        campaign_id:
+          type: integer
+          title: Campaign Id
+        piece_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Piece Id
+        user_id:
+          type: string
+          format: uuid
+          title: User Id
+        user_name:
+          type: string
+          title: User Name
+        action:
+          type: string
+          title: Action
+        version_no:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Version No
+        detail:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Detail
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - campaign_id
+      - piece_id
+      - user_id
+      - user_name
+      - action
+      - version_no
+      - detail
+      - created_at
+      title: ActivityOut
+    ApproveIn:
+      properties:
+        version_no:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Version No
+          description: If given, must equal the current version (guards against reviewing a stale draft).
+      type: object
+      title: ApproveIn
+    BrandIn:
+      properties:
+        name:
+          type: string
+          maxLength: 150
+          minLength: 1
+          title: Name
+        tone:
+          type: string
+          maxLength: 5000
+          minLength: 1
+          title: Tone
+          description: Brand voice, e.g. 'warm, practical, no jargon'.
+        preferred_terms:
+          items:
+            type: string
+          type: array
+          title: Preferred Terms
+          description: Terms to use.
+        avoided_terms:
+          items:
+            type: string
+          type: array
+          title: Avoided Terms
+          description: Terms never to use.
+      type: object
+      required:
+      - name
+      - tone
+      title: BrandIn
+    BrandOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        owner_id:
+          type: string
+          format: uuid
+          title: Owner Id
+        name:
+          type: string
+          title: Name
+        tone:
+          type: string
+          title: Tone
+        preferred_terms:
+          items:
+            type: string
+          type: array
+          title: Preferred Terms
+        avoided_terms:
+          items:
+            type: string
+          type: array
+          title: Avoided Terms
+        updated_by:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Updated By
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - id
+      - owner_id
+      - name
+      - tone
+      - preferred_terms
+      - avoided_terms
+      - updated_by
+      - created_at
+      - updated_at
+      title: BrandOut
+    BrandUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            maxLength: 150
+            minLength: 1
+          - type: 'null'
+          title: Name
+        tone:
+          anyOf:
+          - type: string
+            maxLength: 5000
+            minLength: 1
+          - type: 'null'
+          title: Tone
+        preferred_terms:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Preferred Terms
+        avoided_terms:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Avoided Terms
+      type: object
+      title: BrandUpdate
+    BriefIn:
+      properties:
+        topic:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Topic
+        objective:
+          type: string
+          maxLength: 5000
+          minLength: 1
+          title: Objective
+        platforms:
+          items:
+            $ref: '#/components/schemas/Platform'
+          type: array
+          minItems: 1
+          title: Platforms
+          description: At least one platform.
+        target_audience:
+          anyOf:
+          - type: string
+            maxLength: 5000
+            minLength: 1
+          - type: 'null'
+          title: Target Audience
+        key_messages:
+          anyOf:
+          - type: string
+            maxLength: 5000
+            minLength: 1
+          - type: 'null'
+          title: Key Messages
+        tone:
+          anyOf:
+          - type: string
+            maxLength: 100
+            minLength: 1
+          - type: 'null'
+          title: Tone
+          description: Optional override of the brand tone for this brief only.
+      type: object
+      required:
+      - topic
+      - objective
+      - platforms
+      title: BriefIn
+    BriefOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        campaign_id:
+          type: integer
+          title: Campaign Id
+        created_by:
+          type: string
+          format: uuid
+          title: Created By
+        topic:
+          type: string
+          title: Topic
+        objective:
+          type: string
+          title: Objective
+        target_audience:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Target Audience
+        key_messages:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Key Messages
+        tone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tone
+        effective_tone:
+          type: string
+          title: Effective Tone
+        platforms:
+          items:
+            $ref: '#/components/schemas/Platform'
+          type: array
+          title: Platforms
+        status:
+          $ref: '#/components/schemas/BriefStatus'
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - id
+      - campaign_id
+      - created_by
+      - topic
+      - objective
+      - target_audience
+      - key_messages
+      - tone
+      - effective_tone
+      - platforms
+      - status
+      - created_at
+      - updated_at
+      title: BriefOut
+    BriefStatus:
+      type: string
+      enum:
+      - draft
+      - generating
+      - generated
+      title: BriefStatus
+    BriefUpdate:
+      properties:
+        topic:
+          anyOf:
+          - type: string
+            maxLength: 255
+            minLength: 1
+          - type: 'null'
+          title: Topic
+        objective:
+          anyOf:
+          - type: string
+            maxLength: 5000
+            minLength: 1
+          - type: 'null'
+          title: Objective
+        platforms:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/Platform'
+            type: array
+            minItems: 1
+          - type: 'null'
+          title: Platforms
+        target_audience:
+          anyOf:
+          - type: string
+            maxLength: 5000
+            minLength: 1
+          - type: 'null'
+          title: Target Audience
+        key_messages:
+          anyOf:
+          - type: string
+            maxLength: 5000
+            minLength: 1
+          - type: 'null'
+          title: Key Messages
+        tone:
+          anyOf:
+          - type: string
+            maxLength: 100
+            minLength: 1
+          - type: 'null'
+          title: Tone
+      type: object
+      title: BriefUpdate
+    CampaignCounts:
+      properties:
+        campaign_id:
+          type: integer
+          title: Campaign Id
+        name:
+          type: string
+          title: Name
+        counts:
+          $ref: '#/components/schemas/StatusCounts'
+      type: object
+      required:
+      - campaign_id
+      - name
+      - counts
+      title: CampaignCounts
+    CampaignIn:
+      properties:
+        brand_id:
+          type: integer
+          title: Brand Id
+        name:
+          type: string
+          maxLength: 150
+          minLength: 1
+          title: Name
+        description:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Description
+      type: object
+      required:
+      - brand_id
+      - name
+      title: CampaignIn
+    CampaignOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        brand_id:
+          type: integer
+          title: Brand Id
+        brand_name:
+          type: string
+          title: Brand Name
+        name:
+          type: string
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        my_role:
+          $ref: '#/components/schemas/MemberRole'
+      type: object
+      required:
+      - id
+      - brand_id
+      - brand_name
+      - name
+      - description
+      - created_at
+      - my_role
+      title: CampaignOut
+    CommentIn:
+      properties:
+        body:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Body
+      type: object
+      required:
+      - body
+      title: CommentIn
+    CommentOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        piece_id:
+          type: integer
+          title: Piece Id
+        user_id:
+          type: string
+          format: uuid
+          title: User Id
+        author_name:
+          type: string
+          title: Author Name
+        body:
+          type: string
+          title: Body
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - piece_id
+      - user_id
+      - author_name
+      - body
+      - created_at
+      title: CommentOut
+    ContentPieceDetail:
+      properties:
+        id:
+          type: integer
+          title: Id
+        brief_id:
+          type: integer
+          title: Brief Id
+        campaign_id:
+          type: integer
+          title: Campaign Id
+        platform:
+          $ref: '#/components/schemas/Platform'
+        status:
+          $ref: '#/components/schemas/ContentStatus'
+        created_by:
+          type: string
+          format: uuid
+          title: Created By
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+        current_version:
+          anyOf:
+          - $ref: '#/components/schemas/VersionOut'
+          - type: 'null'
+        rejection_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Rejection Reason
+          description: Reviewer's reason if the piece was rejected.
+        brief:
+          $ref: '#/components/schemas/BriefOut'
+        versions:
+          items:
+            $ref: '#/components/schemas/VersionOut'
+          type: array
+          title: Versions
+        reviews:
+          items:
+            $ref: '#/components/schemas/ReviewOut'
+          type: array
+          title: Reviews
+      type: object
+      required:
+      - id
+      - brief_id
+      - campaign_id
+      - platform
+      - status
+      - created_by
+      - created_at
+      - updated_at
+      - current_version
+      - rejection_reason
+      - brief
+      - versions
+      - reviews
+      title: ContentPieceDetail
+    ContentPieceOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        brief_id:
+          type: integer
+          title: Brief Id
+        campaign_id:
+          type: integer
+          title: Campaign Id
+        platform:
+          $ref: '#/components/schemas/Platform'
+        status:
+          $ref: '#/components/schemas/ContentStatus'
+        created_by:
+          type: string
+          format: uuid
+          title: Created By
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+        current_version:
+          anyOf:
+          - $ref: '#/components/schemas/VersionOut'
+          - type: 'null'
+        rejection_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Rejection Reason
+          description: Reviewer's reason if the piece was rejected.
+      type: object
+      required:
+      - id
+      - brief_id
+      - campaign_id
+      - platform
+      - status
+      - created_by
+      - created_at
+      - updated_at
+      - current_version
+      - rejection_reason
+      title: ContentPieceOut
+    ContentStatus:
+      type: string
+      enum:
+      - draft
+      - pending_review
+      - approved
+      - rejected
+      title: ContentStatus
+    DashboardOut:
+      properties:
+        totals:
+          $ref: '#/components/schemas/StatusCounts'
+        campaigns:
+          items:
+            $ref: '#/components/schemas/CampaignCounts'
+          type: array
+          title: Campaigns
+      type: object
+      required:
+      - totals
+      - campaigns
+      title: DashboardOut
+    EditIn:
+      properties:
+        body:
+          type: string
+          maxLength: 5000
+          minLength: 1
+          title: Body
+          description: Full replacement text; saved as a new version.
+      type: object
+      required:
+      - body
+      title: EditIn
+    ErrorResponse:
+      properties:
+        detail:
+          type: string
+          title: Detail
+        code:
+          type: string
+          title: Code
+        errors:
+          anyOf:
+          - items:
+              additionalProperties: true
+              type: object
+            type: array
+          - type: 'null'
+          title: Errors
+        job_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Job Id
+      type: object
+      required:
+      - detail
+      - code
+      title: ErrorResponse
+    GenerateOut:
+      properties:
+        job:
+          $ref: '#/components/schemas/JobOut'
+        pieces:
+          items:
+            $ref: '#/components/schemas/ContentPieceOut'
+          type: array
+          title: Pieces
+      type: object
+      required:
+      - job
+      - pieces
+      title: GenerateOut
+    HealthOut:
+      properties:
+        status:
+          type: string
+          title: Status
+        database:
+          type: boolean
+          title: Database
+      type: object
+      required:
+      - status
+      - database
+      title: HealthOut
+    JobOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        brief_id:
+          type: integer
+          title: Brief Id
+        platform:
+          anyOf:
+          - $ref: '#/components/schemas/Platform'
+          - type: 'null'
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        error_message:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Error Message
+        feedback_note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Feedback Note
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        finished_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Finished At
+      type: object
+      required:
+      - id
+      - brief_id
+      - platform
+      - status
+      - error_message
+      - feedback_note
+      - created_at
+      - finished_at
+      title: JobOut
+    JobStatus:
+      type: string
+      enum:
+      - queued
+      - running
+      - done
+      - failed
+      title: JobStatus
+    MemberIn:
+      properties:
+        email:
+          type: string
+          title: Email
+          description: Email of a user who has signed in at least once.
+        member_role:
+          $ref: '#/components/schemas/MemberRole'
+      type: object
+      required:
+      - email
+      - member_role
+      title: MemberIn
+    MemberOut:
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          title: User Id
+        name:
+          type: string
+          title: Name
+        email:
+          type: string
+          title: Email
+        member_role:
+          $ref: '#/components/schemas/MemberRole'
+        joined_at:
+          type: string
+          format: date-time
+          title: Joined At
+      type: object
+      required:
+      - user_id
+      - name
+      - email
+      - member_role
+      - joined_at
+      title: MemberOut
+    MemberRole:
+      type: string
+      enum:
+      - owner
+      - creator
+      - reviewer
+      - brand_manager
+      title: MemberRole
+    Platform:
+      type: string
+      enum:
+      - blog
+      - linkedin
+      - facebook
+      - instagram
+      title: Platform
+    RejectIn:
+      properties:
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 10
+          title: Reason
+        version_no:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Version No
+      type: object
+      required:
+      - reason
+      title: RejectIn
+    RequestChangesIn:
+      properties:
+        feedback:
+          type: string
+          maxLength: 2000
+          minLength: 5
+          title: Feedback
+        version_no:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Version No
+      type: object
+      required:
+      - feedback
+      title: RequestChangesIn
+    ReviewDecision:
+      type: string
+      enum:
+      - approved
+      - rejected
+      - changes_requested
+      title: ReviewDecision
+    ReviewOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        version_no:
+          type: integer
+          title: Version No
+        reviewer_id:
+          type: string
+          format: uuid
+          title: Reviewer Id
+        decision:
+          $ref: '#/components/schemas/ReviewDecision'
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+        feedback:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Feedback
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - version_no
+      - reviewer_id
+      - decision
+      - reason
+      - feedback
+      - created_at
+      title: ReviewOut
+    StatusCounts:
+      properties:
+        draft:
+          type: integer
+          title: Draft
+          default: 0
+        pending_review:
+          type: integer
+          title: Pending Review
+          default: 0
+        approved:
+          type: integer
+          title: Approved
+          default: 0
+        rejected:
+          type: integer
+          title: Rejected
+          default: 0
+      type: object
+      title: StatusCounts
+    UserOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        name:
+          type: string
+          title: Name
+        email:
+          type: string
+          title: Email
+        role:
+          $ref: '#/components/schemas/UserRole'
+      type: object
+      required:
+      - id
+      - name
+      - email
+      - role
+      title: UserOut
+    UserRole:
+      type: string
+      enum:
+      - user
+      - admin
+      title: UserRole
+    VersionOrigin:
+      type: string
+      enum:
+      - ai_generated
+      - human_edit
+      - variation
+      - regeneration
+      title: VersionOrigin
+    VersionOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        version_no:
+          type: integer
+          title: Version No
+        body:
+          type: string
+          title: Body
+        creative_suggestion:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Creative Suggestion
+        origin:
+          $ref: '#/components/schemas/VersionOrigin'
+        model_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model Name
+        flags:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Flags
+        created_by:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Created By
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - version_no
+      - body
+      - creative_suggestion
+      - origin
+      - model_name
+      - flags
+      - created_by
+      - created_at
+      title: VersionOut
+  securitySchemes:
+    BearerAuth:
+      type: http
+      description: Supabase Auth access token (JWT) from supabase-js `session.access_token`.
+      scheme: bearer
+tags:
+- name: Account
+- name: Brands
+- name: Campaigns & members
+- name: Briefs & generation
+- name: Content
+- name: Review (human in the loop)
+- name: Dashboard
