@@ -1,0 +1,36 @@
+{
+  "client": {
+    "name": "PennyPilot",
+    "industry": "Personal finance (budgeting app)",
+    "brand_guidelines": {
+      "tone": "Friendly, encouraging and a little witty. Practical, never preachy, and never shames people about money.",
+      "preferred_terms": ["money reset", "small steps", "PennyPilot crew", "track your spending", "savings goal"],
+      "terms_to_avoid": ["guaranteed", "get rich", "risk-free", "financial advice", "cheap", "RBI approved"]
+    }
+  },
+  "campaign": {
+    "name": "New Year Money Reset",
+    "theme": "Start the year with small steps: a free 30-day money reset",
+    "goals": [
+      "Reach 50,000 sign-ups for the 30-Day Money Reset by 10 January 2027",
+      "Grow the PennyPilot Instagram account from 85,000 to 100,000 followers",
+      "Collect at least 1,000 shared resolutions tagged #PennyPilotReset"
+    ],
+    "target_audience": "Young professionals and students aged 22 to 35 who want a better handle on their spending",
+    "start_date": "2026-12-28",
+    "end_date": "2027-01-10",
+    "platforms": ["blog", "linkedin", "facebook", "instagram"],
+    "main_cta": "Join the free 30-Day Money Reset at pennypilot.example/reset",
+    "key_dates": [
+      {"date": "2026-12-28", "event": "Sign-ups for the 30-Day Money Reset open"},
+      {"date": "2027-01-01", "event": "New Year's Day: the 30-Day Money Reset officially starts"},
+      {"date": "2027-01-05", "event": "Live question and answer session with the PennyPilot founders on Instagram, 7 PM IST"}
+    ]
+  },
+  "documents": [
+    {
+      "file": "data/documents/pennypilot_new_year_brief.txt",
+      "type": "campaign_brief"
+    }
+  ]
+}

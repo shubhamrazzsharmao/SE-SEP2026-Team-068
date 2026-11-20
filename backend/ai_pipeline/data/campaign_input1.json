@@ -1,0 +1,35 @@
+{
+  "client": {
+    "name": "Brewleaf Coffee Co.",
+    "industry": "Food and beverage",
+    "brand_guidelines": {
+      "tone": "Warm, upbeat, a little playful. Never preachy.",
+      "preferred_terms": ["cold brew", "small-batch", "slow-steeped", "Brewleaf crew"],
+      "terms_to_avoid": ["cheap", "energy fix", "organic", "detox", "guaranteed"]
+    }
+  },
+  "campaign": {
+    "name": "Cold Brew Cans Launch",
+    "theme": "Slow-steeped cold brew, now ready to grab anywhere",
+    "goals": [
+      "Announce the launch of Brewleaf Cold Brew Cans",
+      "Drive 5,000 first-time online orders in the first 4 weeks",
+      "Grow Instagram followers by 15 percent"
+    ],
+    "target_audience": "Urban professionals and students aged 22 to 35 who drink coffee daily",
+    "start_date": "2027-01-11",
+    "end_date": "2027-02-07",
+        "platforms": ["blog", "linkedin", "facebook", "instagram"],
+    "main_cta": "Order your first 6-pack at brewleaf.example/cans",
+    "key_dates": [
+      {"date": "2027-01-11", "event": "Online pre-orders open"},
+      {"date": "2027-01-18", "event": "Official launch day, with a tasting event at the Pune flagship cafe (Koregaon Park), 4 PM to 8 PM"}
+    ]
+  },
+  "documents": [
+    {
+      "file": "data/documents/brewleaf_launch_brief.txt",
+      "type": "launch_brief"
+    }
+  ]
+}

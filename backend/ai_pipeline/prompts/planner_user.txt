@@ -1,0 +1,49 @@
+Plan the posts for this campaign. Fill every slot listed below.
+
+=== CAMPAIGN ===
+{{CAMPAIGN_CONTEXT}}
+
+=== BRAND GUIDELINES ===
+{{BRAND}}
+
+=== RESTRICTIONS (never claim or do these) ===
+{{RESTRICTIONS}}
+
+=== KEY MESSAGES ===
+{{KEY_MESSAGES}}
+
+=== VERIFIED FACTS (cite these by ID) ===
+{{FACTS}}
+
+=== ANGLES (story directions) ===
+{{ANGLES}}
+
+=== KEY DATES ===
+{{KEY_DATES}}
+A post scheduled on a key date must announce that event and cite the matching date fact.
+
+=== SLOTS TO FILL (date, platform and length are fixed) ===
+{{SLOTS}}
+
+=== POSTS ALREADY PLANNED AND KEPT (do not repeat these topics) ===
+{{KEPT_ITEMS}}
+
+{{FEEDBACK_BLOCK}}
+
+{{HEADER_TASK}}
+
+=== OUTPUT FORMAT (JSON only) ===
+{
+{{HEADER_FIELDS}}  "items": [
+    {
+      "slot_id": "<one of the slot ids above>",
+      "angle_id": "<an angle id such as a2>",
+      "topic": "What this post is about, in one short line.",
+      "key_message": "The single message the reader should take away, in one sentence. It must be supported by the facts you cite.",
+      "fact_ids": ["f3", "f9"],
+      "cta": "The call to action for this post.",
+      "format_note": "The format, for example: carousel, short video script, long-form article, story post."
+    }
+  ]
+}
+Return exactly one item for every slot, using each slot_id once. Cite between 1 and 3 fact IDs per item.
