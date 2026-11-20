@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LuPlus, LuX, LuChevronsUpDown } from "react-icons/lu";
 import { Logo } from "@/components/logo";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { footerNav, mainNav, type NavItem } from "@/lib/app-nav";
 import type { Workspace } from "@/types/app";
 
@@ -61,6 +62,13 @@ export function Sidebar({ workspace, open, onClose }: Props) {
             <LuChevronsUpDown className="ml-auto opacity-60" size={16} />
           </summary>
           <ul className="absolute left-0 right-0 top-full z-10 mt-2 rounded-xl bg-white p-2 text-ink shadow-xl">
+            {workspace.clients.length === 0 && (
+              <li>
+                <Link href="/clients" onClick={onClose} className="block rounded-lg px-2 py-2 text-sm hover:bg-paper">
+                  + Add a client
+                </Link>
+              </li>
+            )}
             {workspace.clients.map((c) => (
               <li key={c.id}>
                 <Link
@@ -88,16 +96,17 @@ export function Sidebar({ workspace, open, onClose }: Props) {
           <ul className="space-y-1">{mainNav.map(renderItem)}</ul>
         </nav>
 
-        <ul className="space-y-1 border-t border-white/10 pt-4">{footerNav.map(renderItem)}</ul>
+        {footerNav.length > 0 && <ul className="space-y-1 border-t border-white/10 pt-4">{footerNav.map(renderItem)}</ul>}
 
         <div className="mt-4 flex items-center gap-3 rounded-xl bg-white/5 px-3 py-3">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-brand text-sm font-bold text-white">
-            {workspace.user.name[0]}
+            {workspace.user.name[0]?.toUpperCase()}
           </span>
-          <div className="leading-tight">
-            <p className="text-sm font-semibold">{workspace.user.name}</p>
-            <p className="text-xs text-paper/50">{workspace.user.role}</p>
+          <div className="min-w-0 leading-tight">
+            <p className="truncate text-sm font-semibold">{workspace.user.name}</p>
+            <p className="truncate text-xs text-paper/50">{workspace.user.email}</p>
           </div>
+          <SignOutButton />
         </div>
       </aside>
     </>

@@ -12,7 +12,7 @@ export function AppShell({ workspace, children }: { workspace: Workspace; childr
     <div className="min-h-screen bg-paper">
       <Sidebar workspace={workspace} open={open} onClose={() => setOpen(false)} />
       <div className="lg:pl-64">
-        <TopBar onMenu={() => setOpen(true)} initial={workspace.user.name[0]} />
+        <TopBar onMenu={() => setOpen(true)} initial={workspace.user.name[0]?.toUpperCase() ?? "?"} />
         <main className="px-6 pb-16 pt-8 lg:px-10">{children}</main>
       </div>
     </div>

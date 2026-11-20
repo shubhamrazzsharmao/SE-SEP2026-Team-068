@@ -17,14 +17,14 @@ export default async function DashboardPage() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <Greeting name={workspace.user.name} />
-          <p className="mt-1 text-muted">Here's where your campaigns stand today.</p>
+          <p className="mt-1 text-muted">Here&apos;s where your campaigns stand today.</p>
         </div>
         <div className="flex gap-2">
           <Link
-            href="/settings/team"
+            href="/campaigns"
             className="rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-semibold transition-colors hover:border-ink/30"
           >
-            Invite teammate
+            Invite teammates
           </Link>
           <Link
             href="/campaigns/new"
