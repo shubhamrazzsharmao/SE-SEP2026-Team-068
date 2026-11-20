@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ContentFlow frontend (Next.js 16)
 
-## Getting Started
+Sign-in is done with Supabase Auth (`@supabase/ssr`). Data comes from the FastAPI backend in `../backend`,
+called with the user's Supabase access token.
 
-First, run the development server:
+## Setup
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Set up Supabase and start the backend first (see `../backend/README.md`).
+2. `cp .env.example .env.local` and fill in:
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or the legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`): Supabase -> Project Settings -> API
+     (the anon / publishable key, never the service_role / secret key).
+   - `NEXT_PUBLIC_API_BASE_URL`: the backend, `http://localhost:8000` by default.
+   - `NEXT_PUBLIC_USE_MOCKS=true` shows mock data with no Supabase or backend (UI work only).
+3. In Supabase -> Authentication -> URL Configuration, set the Site URL to `http://localhost:3000` and add
+   `http://localhost:3000/auth/callback` to the Redirect URLs (email confirmation, Google/LinkedIn sign-in).
+4. `npm install && npm run dev`, then open http://localhost:3000.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How it fits together
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| File | Purpose |
+|---|---|
+| `src/proxy.ts` | Refreshes the session cookie; redirects signed-out users from app pages to `/login` |
+| `src/lib/supabase/{client,server}.ts` | Supabase clients for the browser and the server |
+| `src/app/auth/callback/route.ts` | Handles email confirmation and OAuth redirects |
+| `src/lib/api/client.ts` | `api()` calls `/api/v1/...` with `Authorization: Bearer <token>` |
+| `src/lib/api/dashboard.ts` | Builds the dashboard from `/me`, `/brands`, `/campaigns`, `/dashboard`, content and activity |
+| `src/types/api.ts` | Backend response types (mirror `backend/app/schemas.py`) |
+| `src/types/app.ts` | View models the components use |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`GET /me` is always called first: the first authenticated request creates the user's profile row in the
+backend, which a campaign owner needs before adding that person by email.
