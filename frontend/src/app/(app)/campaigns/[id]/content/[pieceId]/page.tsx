@@ -1,10 +1,12 @@
-import { LuCheck, LuTrash2 } from "react-icons/lu";
+import { LuTrash2 } from "react-icons/lu";
 import { PlatformIcon } from "@/app/platform-icon";
 import { StatusBadge } from "@/app/status-badge";
 import { ActionForm, SubmitButton } from "@/components/ui/action-form";
 import { Textarea } from "@/components/ui/fields";
 import { Card, PageHeader, Pill } from "@/components/ui/layout";
-import { addComment, approve, deleteContent, editContent, reject, requestChanges } from "@/lib/actions";
+import { CommentThread } from "@/components/review/comment-thread";
+import { DecisionBar } from "@/components/review/decision-bar";
+import { deleteContent, editContent } from "@/lib/actions";
 import { getCampaign, getContent, getMe, listComments, listMembers } from "@/lib/api/queries";
 import { formatDate, PLATFORM_LABEL } from "@/lib/format";
 
@@ -24,13 +26,15 @@ export default async function ContentPage({ params }: { params: Promise<{ id: st
   const role = campaign.my_role;
   const v = piece.current_version;
   const versionNo = v?.version_no ?? 1;
-  const pending = piece.status === "pending_review";
 
   // Mirrors the backend rules so we only show buttons that can work. The backend re-checks everything.
-  const canReview = role === "reviewer" && pending;
   const selfReview = piece.created_by === me.id || v?.created_by === me.id;
   const canEdit = ["owner", "creator", "reviewer"].includes(role) && piece.status !== "rejected";
   const canDelete = role === "owner" || role === "creator";
+  const approval = piece.status === "approved"
+    ? piece.reviews.findLast((r) => r.decision === "approved" && r.version_no === versionNo)
+    : undefined;
+  const approvedBy = approval && `${names.get(approval.reviewer_id) ?? "a reviewer"} · ${formatDate(approval.created_at)}`;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -51,36 +55,20 @@ export default async function ContentPage({ params }: { params: Promise<{ id: st
             {v?.creative_suggestion && (
               <p className="mt-3 text-sm text-muted"><strong className="text-ink">Creative suggestion:</strong> {v.creative_suggestion}</p>
             )}
-            {piece.rejection_reason && (
-              <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800"><strong>Rejected:</strong> {piece.rejection_reason}</p>
-            )}
           </Card>
 
-          {canReview && (
-            <Card title="Review">
-              {selfReview ? (
-                <p className="text-sm text-muted">You created or edited this version, so another reviewer has to review it.</p>
-              ) : (
-                <div className="space-y-5">
-                  <ActionForm action={approve.bind(null, piece.id, versionNo)}>
-                    <SubmitButton variant="success" pendingText="Approving…"><LuCheck size={16} /> Approve version {versionNo}</SubmitButton>
-                  </ActionForm>
-                  <div className="grid gap-5 md:grid-cols-2">
-                    <ActionForm action={requestChanges.bind(null, piece.id, versionNo)} reset className="space-y-3">
-                      <Textarea label="Request changes" name="feedback" required minLength={5} maxLength={2000}
-                        placeholder="Shorter, and lead with the date." hint="The AI writes one revised version." />
-                      <SubmitButton variant="outline" pendingText="Revising…">Send feedback</SubmitButton>
-                    </ActionForm>
-                    <ActionForm action={reject.bind(null, piece.id, versionNo)} reset confirm="Rejecting is final. Continue?" className="space-y-3">
-                      <Textarea label="Reject" name="reason" required minLength={10} maxLength={2000}
-                        placeholder="Off-brand claim about results." hint="Final. At least 10 characters." />
-                      <SubmitButton variant="danger" pendingText="Rejecting…">Reject</SubmitButton>
-                    </ActionForm>
-                  </div>
-                </div>
-              )}
-            </Card>
-          )}
+          {piece.status !== "draft" && <Card title="Review">
+            <DecisionBar
+              key={`${piece.status}-${versionNo}`}
+              pieceId={piece.id}
+              versionNo={versionNo}
+              status={piece.status}
+              rejectionReason={piece.rejection_reason}
+              isReviewer={role === "reviewer"}
+              selfReview={selfReview}
+              approvedBy={approvedBy}
+            />
+          </Card>}
 
           {canEdit && (
             <Card title="Edit">
@@ -93,18 +81,7 @@ export default async function ContentPage({ params }: { params: Promise<{ id: st
           )}
 
           <Card title={`Comments (${comments.length})`}>
-            <ul className="space-y-3">
-              {comments.map((c) => (
-                <li key={c.id} className="rounded-2xl bg-paper px-4 py-3 text-sm">
-                  <p className="text-xs text-muted"><strong className="text-ink">{c.author_name}</strong> · {formatDate(c.created_at)}</p>
-                  <p className="mt-1 whitespace-pre-wrap">{c.body}</p>
-                </li>
-              ))}
-            </ul>
-            <ActionForm action={addComment.bind(null, piece.id)} reset className="mt-4 space-y-3">
-              <Textarea label="Add a comment" name="body" required maxLength={2000} rows={2} />
-              <SubmitButton variant="outline" pendingText="Posting…">Post comment</SubmitButton>
-            </ActionForm>
+            <CommentThread pieceId={piece.id} comments={comments} meId={me.id} members={members} />
           </Card>
         </div>
 
