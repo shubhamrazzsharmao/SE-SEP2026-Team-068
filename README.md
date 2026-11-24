@@ -1,4 +1,4 @@
-# ContentFlow (Team 068)
+# Mosaiq (Team 068)
 
 AI-assisted content generation for agencies, with a human review step before anything is approved.
 
