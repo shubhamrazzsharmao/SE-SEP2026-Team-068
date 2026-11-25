@@ -1,4 +1,4 @@
-# ContentFlow backend (Team 068, Sprint 1)
+# Mosaiq backend (Team 068, Sprint 1)
 
 FastAPI + SQLAlchemy on Supabase (Postgres + Auth). AI generation with a human-in-the-loop review workflow.
 
