@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { config as appConfig } from "@/lib/config";
 
 // Routes that need a signed-in user. Everything else (landing page, login, signup) is public.
-const PROTECTED = ["/dashboard", "/clients", "/campaigns", "/calendar", "/reviews", "/ideas", "/library", "/settings", "/help"];
+const PROTECTED = ["/dashboard", "/onboarding", "/clients", "/campaigns", "/calendar", "/reviews", "/ideas", "/library", "/settings", "/help"];
 const AUTH_PAGES = ["/login", "/signup"];
 
 const matches = (path: string, list: string[]) => list.some((p) => path === p || path.startsWith(`${p}/`));
