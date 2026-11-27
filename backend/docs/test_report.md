@@ -10,19 +10,19 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/content/{piece_id}/activity`  |  **User story:** US13
 - **Input:** as Dave BrandManager (dave); path /api/v1/content/1/activity
 - **Expected:** HTTP 200; 0.action = "generated"; 0.user_name = "Bob Creator"; 0.version_no = 1; 1.action = "edited"; 1.version_no = 2; 1.user_name = "Bob Creator"; 2.action = "approved"; 2.user_name = "Carol Reviewer"; 2.version_no = 2; 2.created_at = <present>
-- **Actual:** HTTP 200 [{"id": 8, "campaign_id": 1, "piece_id": 1, "user_id": "60942e38-5094-4f00-b5e6-6d4b3d0bc8af", "user_name": "Bob Creator", "action": "generated", "version_no": 1, "detail": {"platform": "blog", "job_id": 1}, "created_at": "2026-11-24T18:35:52.739533"}, {"id": 12, "campaign_id": 1, "piece_id": 1, "user_id": "60942e38-5094-4f00-b5e6-6d4b3d0bc8af", "user_name": "Bob Creator", "action": "edited", "version_no": 2, "detail ...(truncated)
+- **Actual:** HTTP 200 [{"id": 8, "campaign_id": 1, "piece_id": 1, "user_id": "a0bc0add-2085-4e44-bc23-6987641940e0", "user_name": "Bob Creator", "action": "generated", "version_no": 1, "detail": {"platform": "blog", "job_id": 1}, "created_at": "2026-11-27T18:08:04.948703"}, {"id": 12, "campaign_id": 1, "piece_id": 1, "user_id": "a0bc0add-2085-4e44-bc23-6987641940e0", "user_name": "Bob Creator", "action": "edited", "version_no": 2, "detail ...(truncated)
 
 ### TC-002 - Change-request notes and regenerations are logged  `PASS`
 - **API:** `GET /api/v1/content/{piece_id}/activity`  |  **User story:** US13, US9
 - **Input:** as Bob Creator (bob); path /api/v1/content/3/activity
 - **Expected:** HTTP 200; 1.action = "changes_requested"; 1.detail.feedback = "Stronger CTA please."; 1.version_no = 1; 2.action = "regenerated"; 2.version_no = 2
-- **Actual:** HTTP 200 [{"id": 10, "campaign_id": 1, "piece_id": 3, "user_id": "e8f790c8-4a25-4d55-a310-1915ffd9df74", "user_name": "Bob Creator", "action": "generated", "version_no": 1, "detail": {"platform": "facebook", "job_id": 1}, "created_at": "2026-11-24T18:35:52.839480"}, {"id": 12, "campaign_id": 1, "piece_id": 3, "user_id": "10d7e7eb-4d7e-4b88-9e55-9f15c90129b7", "user_name": "Carol Reviewer", "action": "changes_requested", "vers ...(truncated)
+- **Actual:** HTTP 200 [{"id": 10, "campaign_id": 1, "piece_id": 3, "user_id": "739c8b63-d00c-44ec-8354-8d0f2b3acf09", "user_name": "Bob Creator", "action": "generated", "version_no": 1, "detail": {"platform": "facebook", "job_id": 1}, "created_at": "2026-11-27T18:08:05.089080"}, {"id": 12, "campaign_id": 1, "piece_id": 3, "user_id": "5c7d487e-c374-47f2-bb5a-e7bf5d783b12", "user_name": "Carol Reviewer", "action": "changes_requested", "vers ...(truncated)
 
 ### TC-003 - The rejection and its reason are logged  `PASS`
 - **API:** `GET /api/v1/content/{piece_id}/activity`  |  **User story:** US13, US8
 - **Input:** as Bob Creator (bob); path /api/v1/content/1/activity
 - **Expected:** HTTP 200; 1.action = "rejected"; 1.detail.reason = "Not suitable for our audience."
-- **Actual:** HTTP 200 [{"id": 8, "campaign_id": 1, "piece_id": 1, "user_id": "0e2ad110-cd5b-4692-844f-b71933130d56", "user_name": "Bob Creator", "action": "generated", "version_no": 1, "detail": {"platform": "blog", "job_id": 1}, "created_at": "2026-11-24T18:35:52.885297"}, {"id": 12, "campaign_id": 1, "piece_id": 1, "user_id": "84321d1d-1dd2-4dcd-b983-9dd808bfbb60", "user_name": "Carol Reviewer", "action": "rejected", "version_no": 1, "d ...(truncated)
+- **Actual:** HTTP 200 [{"id": 8, "campaign_id": 1, "piece_id": 1, "user_id": "735d155b-3925-4213-91a2-da190cb4361f", "user_name": "Bob Creator", "action": "generated", "version_no": 1, "detail": {"platform": "blog", "job_id": 1}, "created_at": "2026-11-27T18:08:05.170307"}, {"id": 12, "campaign_id": 1, "piece_id": 1, "user_id": "75c36115-3eb8-4d30-9617-806ea3352298", "user_name": "Carol Reviewer", "action": "rejected", "version_no": 1, "d ...(truncated)
 
 ### TC-004 - Outsider gets 404 for a piece's log  `PASS`
 - **API:** `GET /api/v1/content/{piece_id}/activity`  |  **User story:** US13
@@ -34,7 +34,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/campaigns/{campaign_id}/activity`  |  **User story:** US13
 - **Input:** as Alice Owner (alice); path /api/v1/campaigns/1/activity
 - **Expected:** HTTP 200; 0.action = "approved"; 0.user_name = "Carol Reviewer"
-- **Actual:** HTTP 200 [{"id": 12, "campaign_id": 1, "piece_id": 1, "user_id": "059ca3c3-c264-4c62-a12d-d23f82dc292e", "user_name": "Carol Reviewer", "action": "approved", "version_no": 1, "detail": null, "created_at": "2026-11-24T18:35:52.984048"}, {"id": 11, "campaign_id": 1, "piece_id": 4, "user_id": "1e0b32d1-f2c6-4282-94f5-cd31ddc55649", "user_name": "Bob Creator", "action": "generated", "version_no": 1, "detail": {"platform": "instag ...(truncated)
+- **Actual:** HTTP 200 [{"id": 12, "campaign_id": 1, "piece_id": 1, "user_id": "81d935a5-ff34-4231-a01d-2aa91b99a6e3", "user_name": "Carol Reviewer", "action": "approved", "version_no": 1, "detail": null, "created_at": "2026-11-27T18:08:05.325406"}, {"id": 11, "campaign_id": 1, "piece_id": 4, "user_id": "81272064-bb65-4084-9fc4-7227eb2de254", "user_name": "Bob Creator", "action": "generated", "version_no": 1, "detail": {"platform": "instag ...(truncated)
 
 ### TC-006 - Creators cannot read the campaign-wide log  `PASS`
 - **API:** `GET /api/v1/campaigns/{campaign_id}/activity`  |  **User story:** US13
@@ -46,7 +46,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/campaigns/{campaign_id}/activity`  |  **User story:** US13
 - **Input:** as Eve Outsider (eve); path /api/v1/campaigns/1/activity
 - **Expected:** HTTP 200; 0.action = <present>
-- **Actual:** HTTP 200 [{"id": 11, "campaign_id": 1, "piece_id": 4, "user_id": "e24c48e7-353f-4914-b965-d0c736a55684", "user_name": "Bob Creator", "action": "generated", "version_no": 1, "detail": {"platform": "instagram", "job_id": 1}, "created_at": "2026-11-24T18:35:53.068562"}, {"id": 10, "campaign_id": 1, "piece_id": 3, "user_id": "e24c48e7-353f-4914-b965-d0c736a55684", "user_name": "Bob Creator", "action": "generated", "version_no": 1 ...(truncated)
+- **Actual:** HTTP 200 [{"id": 11, "campaign_id": 1, "piece_id": 4, "user_id": "bde917db-c9b4-4277-b070-2c80c24be4e1", "user_name": "Bob Creator", "action": "generated", "version_no": 1, "detail": {"platform": "instagram", "job_id": 1}, "created_at": "2026-11-27T18:08:05.507273"}, {"id": 10, "campaign_id": 1, "piece_id": 3, "user_id": "bde917db-c9b4-4277-b070-2c80c24be4e1", "user_name": "Bob Creator", "action": "generated", "version_no": 1 ...(truncated)
 
 ### TC-008 - Admin asking for a campaign that does not exist gets 404  `PASS`
 - **API:** `GET /api/v1/campaigns/{campaign_id}/activity`  |  **User story:** US13
@@ -105,14 +105,14 @@ Each case lists the request that was sent, what we expected and what the API act
 ### TC-017 - First authenticated call creates the profile from the token claims  `PASS`
 - **API:** `GET /api/v1/me`  |  **User story:** US11
 - **Input:** as Alice Owner (alice); path /api/v1/me
-- **Expected:** HTTP 200; name = "Alice Owner"; email = "alice@example.com"; role = "user"; id = "a5db4ee9-4ca2-4eb4-98f0-9288057aa118"
-- **Actual:** HTTP 200 {"id": "a5db4ee9-4ca2-4eb4-98f0-9288057aa118", "name": "Alice Owner", "email": "alice@example.com", "role": "user"}
+- **Expected:** HTTP 200; name = "Alice Owner"; email = "alice@example.com"; role = "user"; id = "7caf0a25-f278-42a1-9ab7-ddb1a956aea5"
+- **Actual:** HTTP 200 {"id": "7caf0a25-f278-42a1-9ab7-ddb1a956aea5", "name": "Alice Owner", "email": "alice@example.com", "role": "user"}
 
 ### TC-018 - Name falls back to the email prefix when the token has no name  `PASS`
 - **API:** `GET /api/v1/me`
 - **Input:** as custom token; path /api/v1/me
 - **Expected:** HTTP 200; name = "bob"; email = "bob@example.com"
-- **Actual:** HTTP 200 {"id": "38827a48-6750-486b-8864-6f16fe5dd1f5", "name": "bob", "email": "bob@example.com", "role": "user"}
+- **Actual:** HTTP 200 {"id": "6d8d9387-0cd5-4bb4-ace2-2edd1799d0a7", "name": "bob", "email": "bob@example.com", "role": "user"}
 
 ### TC-019 - Token of an unknown user without an email claim is rejected  `PASS`
 - **API:** `GET /api/v1/me`
@@ -148,7 +148,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/me`
 - **Input:** as custom token; path /api/v1/me
 - **Expected:** HTTP 200; email = "alice@example.com"
-- **Actual:** HTTP 200 {"id": "fad86225-b861-4b15-ae34-0036552238a4", "name": "Alice Owner", "email": "alice@example.com", "role": "user"}
+- **Actual:** HTTP 200 {"id": "c533296a-ab41-436c-bd4f-631a76f1155c", "name": "Alice Owner", "email": "alice@example.com", "role": "user"}
 
 ### TC-025 - ES256 token signed with a different key (same key id) is rejected  `PASS`
 - **API:** `GET /api/v1/me`
@@ -159,8 +159,8 @@ Each case lists the request that was sent, what we expected and what the API act
 ### TC-026 - Create a brand with tone, preferred and avoided terms  `PASS`
 - **API:** `POST /api/v1/brands`  |  **User story:** US5
 - **Input:** as Alice Owner (alice); path /api/v1/brands; body {"name": "Acme Tea", "tone": "friendly and calm", "preferred_terms": ["handpicked"], "avoided_terms": ["cheap"]}
-- **Expected:** HTTP 201; name = "Acme Tea"; tone = "friendly and calm"; preferred_terms = ["handpicked"]; avoided_terms = ["cheap"]; owner_id = "dfc601a0-eaab-408d-9d33-2ef036bb5085"
-- **Actual:** HTTP 201 {"id": 1, "owner_id": "dfc601a0-eaab-408d-9d33-2ef036bb5085", "name": "Acme Tea", "tone": "friendly and calm", "preferred_terms": ["handpicked"], "avoided_terms": ["cheap"], "updated_by": "dfc601a0-eaab-408d-9d33-2ef036bb5085", "created_at": "2026-11-24T18:35:54.350436Z", "updated_at": "2026-11-24T18:35:54.350438Z"}
+- **Expected:** HTTP 201; name = "Acme Tea"; tone = "friendly and calm"; preferred_terms = ["handpicked"]; avoided_terms = ["cheap"]; owner_id = "5d987606-ec49-4e4a-9625-b1d36dcac37c"
+- **Actual:** HTTP 201 {"id": 1, "owner_id": "5d987606-ec49-4e4a-9625-b1d36dcac37c", "name": "Acme Tea", "tone": "friendly and calm", "preferred_terms": ["handpicked"], "avoided_terms": ["cheap"], "updated_by": "5d987606-ec49-4e4a-9625-b1d36dcac37c", "created_at": "2026-11-27T18:08:07.169057Z", "updated_at": "2026-11-27T18:08:07.169060Z"}
 
 ### TC-027 - Brand without tone is rejected  `PASS`
 - **API:** `POST /api/v1/brands`  |  **User story:** US5
@@ -184,13 +184,13 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `POST /api/v1/brands`  |  **User story:** US5
 - **Input:** as Alice Owner (alice); path /api/v1/brands; body {"name": "Acme Tea", "tone": "friendly and calm", "preferred_terms": [" organic ", "", "organic", "local"], "avoided_terms": ["cheap"]}
 - **Expected:** HTTP 201; preferred_terms = ["organic", "local"]
-- **Actual:** HTTP 201 {"id": 1, "owner_id": "fb4e63fd-7757-4f4a-a0f2-64909af43f7f", "name": "Acme Tea", "tone": "friendly and calm", "preferred_terms": ["organic", "local"], "avoided_terms": ["cheap"], "updated_by": "fb4e63fd-7757-4f4a-a0f2-64909af43f7f", "created_at": "2026-11-24T18:35:54.409101Z", "updated_at": "2026-11-24T18:35:54.409102Z"}
+- **Actual:** HTTP 201 {"id": 1, "owner_id": "f7c3f16d-0e5f-4430-b422-f7c7354d1de9", "name": "Acme Tea", "tone": "friendly and calm", "preferred_terms": ["organic", "local"], "avoided_terms": ["cheap"], "updated_by": "f7c3f16d-0e5f-4430-b422-f7c7354d1de9", "created_at": "2026-11-27T18:08:07.265085Z", "updated_at": "2026-11-27T18:08:07.265086Z"}
 
 ### TC-031 - Owner and campaign members see the brand; an outsider sees none  `PASS`
 - **API:** `GET /api/v1/brands`  |  **User story:** US5, US11
 - **Input:** as Bob Creator (bob); path /api/v1/brands
 - **Expected:** HTTP 200; 0.name = "GreenLeaf Organics"
-- **Actual:** HTTP 200 [{"id": 1, "owner_id": "13f22312-1508-49fd-91e4-e6fd4a71d0b0", "name": "GreenLeaf Organics", "tone": "warm, practical, no jargon", "preferred_terms": ["organic", "sustainable"], "avoided_terms": ["cheap", "chemical"], "updated_by": "13f22312-1508-49fd-91e4-e6fd4a71d0b0", "created_at": "2026-11-24T18:35:54.430067", "updated_at": "2026-11-24T18:35:54.430067"}]
+- **Actual:** HTTP 200 [{"id": 1, "owner_id": "308ad16b-ca4c-4e9a-bcce-98ee5d546013", "name": "GreenLeaf Organics", "tone": "warm, practical, no jargon", "preferred_terms": ["organic", "sustainable"], "avoided_terms": ["cheap", "chemical"], "updated_by": "308ad16b-ca4c-4e9a-bcce-98ee5d546013", "created_at": "2026-11-27T18:08:07.300935", "updated_at": "2026-11-27T18:08:07.300936"}]
 
 ### TC-032 - Owner and campaign members see the brand; an outsider sees none  `PASS`
 - **API:** `GET /api/v1/brands`  |  **User story:** US5, US11
@@ -208,13 +208,13 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/brands/{brand_id}`  |  **User story:** US5
 - **Input:** as Carol Reviewer (carol); path /api/v1/brands/1
 - **Expected:** HTTP 200; name = "GreenLeaf Organics"
-- **Actual:** HTTP 200 {"id": 1, "owner_id": "9cc7725b-b582-4053-ab5b-d4c193361e32", "name": "GreenLeaf Organics", "tone": "warm, practical, no jargon", "preferred_terms": ["organic", "sustainable"], "avoided_terms": ["cheap", "chemical"], "updated_by": "9cc7725b-b582-4053-ab5b-d4c193361e32", "created_at": "2026-11-24T18:35:54.501143", "updated_at": "2026-11-24T18:35:54.501143"}
+- **Actual:** HTTP 200 {"id": 1, "owner_id": "6dc80de9-463d-4efa-b1f9-6b2e1bf28d0e", "name": "GreenLeaf Organics", "tone": "warm, practical, no jargon", "preferred_terms": ["organic", "sustainable"], "avoided_terms": ["cheap", "chemical"], "updated_by": "6dc80de9-463d-4efa-b1f9-6b2e1bf28d0e", "created_at": "2026-11-27T18:08:07.424362", "updated_at": "2026-11-27T18:08:07.424363"}
 
 ### TC-035 - Brand manager of a campaign can edit the brand tone  `PASS`
 - **API:** `PATCH /api/v1/brands/{brand_id}`  |  **User story:** US5
 - **Input:** as Dave BrandManager (dave); path /api/v1/brands/1; body {"tone": "bold and playful"}
-- **Expected:** HTTP 200; tone = "bold and playful"; updated_by = "260d2e8b-c5af-4feb-b050-b30078cb2aa8"
-- **Actual:** HTTP 200 {"id": 1, "owner_id": "0ea645b7-e577-479b-a0de-350194baa1ab", "name": "GreenLeaf Organics", "tone": "bold and playful", "preferred_terms": ["organic", "sustainable"], "avoided_terms": ["cheap", "chemical"], "updated_by": "260d2e8b-c5af-4feb-b050-b30078cb2aa8", "created_at": "2026-11-24T18:35:54.535301", "updated_at": "2026-11-24T18:35:54.550276Z"}
+- **Expected:** HTTP 200; tone = "bold and playful"; updated_by = "d98b92ce-d13f-4802-9eb8-21ae14c23ccc"
+- **Actual:** HTTP 200 {"id": 1, "owner_id": "f9284ef3-c667-4348-acd4-ec2cfbbe4e2d", "name": "GreenLeaf Organics", "tone": "bold and playful", "preferred_terms": ["organic", "sustainable"], "avoided_terms": ["cheap", "chemical"], "updated_by": "d98b92ce-d13f-4802-9eb8-21ae14c23ccc", "created_at": "2026-11-27T18:08:07.483131", "updated_at": "2026-11-27T18:08:07.505645Z"}
 
 ### TC-036 - Creator cannot edit brand guidelines  `PASS`
 - **API:** `PATCH /api/v1/brands/{brand_id}`  |  **User story:** US5
@@ -244,31 +244,31 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US5, US3
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/1
 - **Expected:** HTTP 200; current_version.body = "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made from recycled material\n\n## What to do next\nTone: warm, practical, no jargon. Key terms: organic, sustainable.\n\n## Conclusion\nDrive pre-orders of the compost kit"; current_version.version_no = 1
-- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "af909150-fdbb-4c6e-a71f-1c061ae8a45b", "created_at": "2026-11-24T18:35:54.725820", "updated_at": "2026-11-24T18:35:54.726173", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made  ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "011b1edb-ff37-4e0d-8ac3-90fc5fef6a91", "created_at": "2026-11-27T18:08:07.800205", "updated_at": "2026-11-27T18:08:07.800837", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made  ...(truncated)
 
 ### TC-041 - Creator submits a brief; the brand tone is used by default  `PASS`
 - **API:** `POST /api/v1/campaigns/{campaign_id}/briefs`  |  **User story:** US1
 - **Input:** as Bob Creator (bob); path /api/v1/campaigns/1/briefs; body {"topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "platforms": ["blog", "linkedin", "facebook", "instagram"]}
-- **Expected:** HTTP 201; topic = "Spring Compost Kit"; status = "draft"; tone = null; effective_tone = "warm, practical, no jargon"; platforms = ["blog", "linkedin", "facebook", "instagram"]; created_by = "747902e1-37bf-4ea4-9131-6fb268edfd52"
-- **Actual:** HTTP 201 {"id": 1, "campaign_id": 1, "created_by": "747902e1-37bf-4ea4-9131-6fb268edfd52", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog", "linkedin", "facebook", "instagram"], "status": "draft", "created_at ...(truncated)
+- **Expected:** HTTP 201; topic = "Spring Compost Kit"; status = "draft"; tone = null; effective_tone = "warm, practical, no jargon"; platforms = ["blog", "linkedin", "facebook", "instagram"]; created_by = "dffe9f06-eef2-42cd-bde9-ab03e995ec3f"
+- **Actual:** HTTP 201 {"id": 1, "campaign_id": 1, "created_by": "dffe9f06-eef2-42cd-bde9-ab03e995ec3f", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog", "linkedin", "facebook", "instagram"], "status": "draft", "created_at ...(truncated)
 
 ### TC-042 - A brief can override the brand tone for itself only  `PASS`
 - **API:** `POST /api/v1/campaigns/{campaign_id}/briefs`  |  **User story:** US1
 - **Input:** as Bob Creator (bob); path /api/v1/campaigns/1/briefs; body {"topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "platforms": ["blog", "linkedin", "facebook", "instagram"], "tone": "urgent"}
 - **Expected:** HTTP 201; tone = "urgent"; effective_tone = "urgent"
-- **Actual:** HTTP 201 {"id": 1, "campaign_id": 1, "created_by": "661be3f2-0944-4de8-be5c-55f850900aff", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": "urgent", "effective_tone": "urgent", "platforms": ["blog", "linkedin", "facebook", "instagram"], "status": "draft", "created_at": "2026-11-24T1 ...(truncated)
+- **Actual:** HTTP 201 {"id": 1, "campaign_id": 1, "created_by": "d9f4c20f-46d9-4ff8-8b1d-272cded78574", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": "urgent", "effective_tone": "urgent", "platforms": ["blog", "linkedin", "facebook", "instagram"], "status": "draft", "created_at": "2026-11-27T1 ...(truncated)
 
 ### TC-043 - Audience and key messages are optional  `PASS`
 - **API:** `POST /api/v1/campaigns/{campaign_id}/briefs`  |  **User story:** US1
 - **Input:** as Alice Owner (alice); path /api/v1/campaigns/1/briefs; body {"topic": "T", "objective": "O", "platforms": ["blog"]}
 - **Expected:** HTTP 201; target_audience = null; key_messages = null
-- **Actual:** HTTP 201 {"id": 1, "campaign_id": 1, "created_by": "9ec8e62f-0762-4213-8b43-9c856d951fa8", "topic": "T", "objective": "O", "target_audience": null, "key_messages": null, "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog"], "status": "draft", "created_at": "2026-11-24T18:35:54.840029Z", "updated_at": "2026-11-24T18:35:54.840029Z"}
+- **Actual:** HTTP 201 {"id": 1, "campaign_id": 1, "created_by": "5dbeaa1c-fb35-4912-a938-ea28477762c4", "topic": "T", "objective": "O", "target_audience": null, "key_messages": null, "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog"], "status": "draft", "created_at": "2026-11-27T18:08:07.992284Z", "updated_at": "2026-11-27T18:08:07.992285Z"}
 
 ### TC-044 - Repeated platforms are stored once  `PASS`
 - **API:** `POST /api/v1/campaigns/{campaign_id}/briefs`  |  **User story:** US1
 - **Input:** as Bob Creator (bob); path /api/v1/campaigns/1/briefs; body {"topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "platforms": ["blog", "blog", "facebook"]}
 - **Expected:** HTTP 201; platforms = ["blog", "facebook"]
-- **Actual:** HTTP 201 {"id": 1, "campaign_id": 1, "created_by": "65e0c101-97df-4b39-97d2-93b918ebcbe4", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog", "facebook"], "status": "draft", "created_at": "2026-11-24T18:35:54.8 ...(truncated)
+- **Actual:** HTTP 201 {"id": 1, "campaign_id": 1, "created_by": "8a0351ad-4044-45a6-bb1e-cb813c75fcb8", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog", "facebook"], "status": "draft", "created_at": "2026-11-27T18:08:08.0 ...(truncated)
 
 ### TC-045 - Brief without a topic is rejected  `PASS`
 - **API:** `POST /api/v1/campaigns/{campaign_id}/briefs`  |  **User story:** US1
@@ -316,7 +316,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `PATCH /api/v1/briefs/{brief_id}`  |  **User story:** US1
 - **Input:** as Bob Creator (bob); path /api/v1/briefs/1; body {"topic": "New Topic", "platforms": ["blog"]}
 - **Expected:** HTTP 200; topic = "New Topic"; platforms = ["blog"]; status = "draft"
-- **Actual:** HTTP 200 {"id": 1, "campaign_id": 1, "created_by": "da8db281-9bda-425e-ab92-27a2c6733f9e", "topic": "New Topic", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog"], "status": "draft", "created_at": "2026-11-24T18:35:55.153521", "updated_at": ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "campaign_id": 1, "created_by": "a62a978f-e66b-40fa-bac8-631f959f136c", "topic": "New Topic", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog"], "status": "draft", "created_at": "2026-11-27T18:08:08.522438", "updated_at": ...(truncated)
 
 ### TC-053 - PATCH with no fields is rejected  `PASS`
 - **API:** `PATCH /api/v1/briefs/{brief_id}`  |  **User story:** US1
@@ -346,7 +346,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/briefs/{brief_id}`  |  **User story:** US6
 - **Input:** as Carol Reviewer (carol); path /api/v1/briefs/1
 - **Expected:** HTTP 200; topic = "Spring Compost Kit"
-- **Actual:** HTTP 200 {"id": 1, "campaign_id": 1, "created_by": "14409104-8040-4863-bdf0-3508c1f18c4d", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog", "linkedin", "facebook", "instagram"], "status": "draft", "created_at ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "campaign_id": 1, "created_by": "aad9a8d8-68c3-4cf1-ade1-1de7337713c0", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog", "linkedin", "facebook", "instagram"], "status": "draft", "created_at ...(truncated)
 
 ### TC-058 - Outsider gets 404 for a brief  `PASS`
 - **API:** `GET /api/v1/briefs/{brief_id}`  |  **User story:** US1
@@ -358,7 +358,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/campaigns/{campaign_id}/briefs`  |  **User story:** US1, US11
 - **Input:** as Carol Reviewer (carol); path /api/v1/campaigns/1/briefs
 - **Expected:** HTTP 200; 0.id = 1
-- **Actual:** HTTP 200 [{"id": 1, "campaign_id": 1, "created_by": "521a146c-09e3-4ad6-97fb-f44a0ced5b1b", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog", "linkedin", "facebook", "instagram"], "status": "draft", "created_a ...(truncated)
+- **Actual:** HTTP 200 [{"id": 1, "campaign_id": 1, "created_by": "b794c0e5-0b0d-4304-a74f-c869f5a653c9", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog", "linkedin", "facebook", "instagram"], "status": "draft", "created_a ...(truncated)
 
 ### TC-060 - Unknown brief id returns 404  `PASS`
 - **API:** `GET /api/v1/briefs/{brief_id}`  |  **User story:** US1
@@ -370,7 +370,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `POST /api/v1/campaigns`  |  **User story:** US11
 - **Input:** as Alice Owner (alice); path /api/v1/campaigns; body {"brand_id": 1, "name": "Autumn Sale"}
 - **Expected:** HTTP 201; name = "Autumn Sale"; my_role = "owner"; brand_name = "GreenLeaf Organics"
-- **Actual:** HTTP 201 {"id": 2, "brand_id": 1, "brand_name": "GreenLeaf Organics", "name": "Autumn Sale", "description": null, "created_at": "2026-11-24T18:35:55.480942Z", "my_role": "owner"}
+- **Actual:** HTTP 201 {"id": 2, "brand_id": 1, "brand_name": "GreenLeaf Organics", "name": "Autumn Sale", "description": null, "created_at": "2026-11-27T18:08:09.082086Z", "my_role": "owner"}
 
 ### TC-062 - Cannot create a campaign on somebody else's brand  `PASS`
 - **API:** `POST /api/v1/campaigns`  |  **User story:** US11
@@ -388,7 +388,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/campaigns`  |  **User story:** US11
 - **Input:** as Carol Reviewer (carol); path /api/v1/campaigns
 - **Expected:** HTTP 200; 0.my_role = "reviewer"; 0.id = 1
-- **Actual:** HTTP 200 [{"id": 1, "brand_id": 1, "brand_name": "GreenLeaf Organics", "name": "Spring Launch", "description": "Spring product launch", "created_at": "2026-11-24T18:35:55.572627", "my_role": "reviewer"}]
+- **Actual:** HTTP 200 [{"id": 1, "brand_id": 1, "brand_name": "GreenLeaf Organics", "name": "Spring Launch", "description": "Spring product launch", "created_at": "2026-11-27T18:08:09.246848", "my_role": "reviewer"}]
 
 ### TC-065 - Members list their campaign with their role; outsiders see nothing  `PASS`
 - **API:** `GET /api/v1/campaigns`  |  **User story:** US11
@@ -406,13 +406,13 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/campaigns/{campaign_id}`  |  **User story:** US11
 - **Input:** as Bob Creator (bob); path /api/v1/campaigns/1
 - **Expected:** HTTP 200; my_role = "creator"; name = "Spring Launch"
-- **Actual:** HTTP 200 {"id": 1, "brand_id": 1, "brand_name": "GreenLeaf Organics", "name": "Spring Launch", "description": "Spring product launch", "created_at": "2026-11-24T18:35:55.641458", "my_role": "creator"}
+- **Actual:** HTTP 200 {"id": 1, "brand_id": 1, "brand_name": "GreenLeaf Organics", "name": "Spring Launch", "description": "Spring product launch", "created_at": "2026-11-27T18:08:09.363812", "my_role": "creator"}
 
 ### TC-068 - Member list contains the owner and all added members with one role each  `PASS`
 - **API:** `GET /api/v1/campaigns/{campaign_id}/members`  |  **User story:** US11
 - **Input:** as Alice Owner (alice); path /api/v1/campaigns/1/members
 - **Expected:** HTTP 200; 0.member_role = "owner"; 0.email = "alice@example.com"
-- **Actual:** HTTP 200 [{"user_id": "ca4cf296-84b6-4af7-bb28-c5c2ebec2b3a", "name": "Alice Owner", "email": "alice@example.com", "member_role": "owner", "joined_at": "2026-11-24T18:35:55.674885"}, {"user_id": "1dd417b0-8ae7-4d6d-bd77-27a0ab1e625f", "name": "Bob Creator", "email": "bob@example.com", "member_role": "creator", "joined_at": "2026-11-24T18:35:55.677137"}, {"user_id": "2f46b60e-1e26-48d4-a4d9-8048ee17f0db", "name": "Carol Review ...(truncated)
+- **Actual:** HTTP 200 [{"user_id": "01c55512-c34c-4585-9db9-03d0cd8712c5", "name": "Alice Owner", "email": "alice@example.com", "member_role": "owner", "joined_at": "2026-11-27T18:08:09.423956"}, {"user_id": "e14e714d-916a-4bdb-826a-465fa4aefe19", "name": "Bob Creator", "email": "bob@example.com", "member_role": "creator", "joined_at": "2026-11-27T18:08:09.428830"}, {"user_id": "1ef427c5-cfb1-45b2-bb40-2231fc276f13", "name": "Carol Review ...(truncated)
 
 ### TC-069 - campaign has 5 members (owner + 4 added)  `PASS`
 - **API:** `GET /api/v1/campaigns/{campaign_id}/members`
@@ -430,7 +430,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `POST /api/v1/campaigns/{campaign_id}/members`  |  **User story:** US11, US6
 - **Input:** as Alice Owner (alice); path /api/v1/campaigns/1/members; body {"email": "EVE@example.com", "member_role": "reviewer"}
 - **Expected:** HTTP 201; member_role = "reviewer"; email = "eve@example.com"; name = "Eve Outsider"
-- **Actual:** HTTP 201 {"user_id": "3eb96fc6-b39c-4455-99b2-f72177aa7aa2", "name": "Eve Outsider", "email": "eve@example.com", "member_role": "reviewer", "joined_at": "2026-11-24T18:35:55.755072Z"}
+- **Actual:** HTTP 201 {"user_id": "84c1fe7e-84bc-4429-8f7a-dabc896858f1", "name": "Eve Outsider", "email": "eve@example.com", "member_role": "reviewer", "joined_at": "2026-11-27T18:08:09.574314Z"}
 
 ### TC-072 - Only owners can add members  `PASS`
 - **API:** `POST /api/v1/campaigns/{campaign_id}/members`  |  **User story:** US11
@@ -464,13 +464,13 @@ Each case lists the request that was sent, what we expected and what the API act
 
 ### TC-077 - A campaign always keeps at least one owner  `PASS`
 - **API:** `DELETE /api/v1/campaigns/{campaign_id}/members/{user_id}`  |  **User story:** US11
-- **Input:** as Alice Owner (alice); path /api/v1/campaigns/1/members/bd383661-06ca-4c55-be63-1bc47029aed8
+- **Input:** as Alice Owner (alice); path /api/v1/campaigns/1/members/21ef0fe2-c4ab-4ac2-b9d0-f69eadf499d9
 - **Expected:** HTTP 409; code = "LAST_OWNER"
 - **Actual:** HTTP 409 {"detail": "A campaign must keep at least one owner.", "code": "LAST_OWNER"}
 
 ### TC-078 - Removing a member revokes access immediately  `PASS`
 - **API:** `DELETE /api/v1/campaigns/{campaign_id}/members/{user_id}`  |  **User story:** US11
-- **Input:** as Alice Owner (alice); path /api/v1/campaigns/1/members/263db953-ce94-4614-bcac-826fd54f98a8
+- **Input:** as Alice Owner (alice); path /api/v1/campaigns/1/members/db79390b-ca8d-437b-b2a6-7ab24554266a
 - **Expected:** HTTP 204
 - **Actual:** HTTP 204
 
@@ -482,13 +482,13 @@ Each case lists the request that was sent, what we expected and what the API act
 
 ### TC-080 - Creator cannot remove members  `PASS`
 - **API:** `DELETE /api/v1/campaigns/{campaign_id}/members/{user_id}`  |  **User story:** US11
-- **Input:** as Bob Creator (bob); path /api/v1/campaigns/1/members/1de8a85f-8644-4c23-83b9-f0fccad18bb7
+- **Input:** as Bob Creator (bob); path /api/v1/campaigns/1/members/ee706dae-7a89-4045-85b4-08211861a4a1
 - **Expected:** HTTP 403; code = "FORBIDDEN"
 - **Actual:** HTTP 403 {"detail": "This action requires one of these campaign roles: owner.", "code": "FORBIDDEN"}
 
 ### TC-081 - Removing a user who is not a member returns 404  `PASS`
 - **API:** `DELETE /api/v1/campaigns/{campaign_id}/members/{user_id}`  |  **User story:** US11
-- **Input:** as Alice Owner (alice); path /api/v1/campaigns/1/members/7e9abc45-8872-4cdc-8408-4e0af32146c6
+- **Input:** as Alice Owner (alice); path /api/v1/campaigns/1/members/268a5586-bf09-4916-add7-4178cab9b1d5
 - **Expected:** HTTP 404; code = "NOT_FOUND"
 - **Actual:** HTTP 404 {"detail": "Member not found.", "code": "NOT_FOUND"}
 
@@ -508,7 +508,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/campaigns/{campaign_id}/content`  |  **User story:** US10
 - **Input:** as Bob Creator (bob); path /api/v1/campaigns/1/content; query {"status": "approved"}
 - **Expected:** HTTP 200; 0.platform = "blog"
-- **Actual:** HTTP 200 [{"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "approved", "created_by": "38f5de85-59a9-4607-a82e-ef0566cf034c", "created_at": "2026-11-24T18:35:56.145933", "updated_at": "2026-11-24T18:35:56.150197", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made from  ...(truncated)
+- **Actual:** HTTP 200 [{"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "approved", "created_by": "8d083176-4dda-4c56-a2a4-aa8ceab06ed7", "created_at": "2026-11-27T18:08:10.249843", "updated_at": "2026-11-27T18:08:10.257066", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made from  ...(truncated)
 
 ### TC-085 - one approved piece  `PASS`
 - **API:** `GET /api/v1/campaigns/{campaign_id}/content`
@@ -520,7 +520,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/campaigns/{campaign_id}/content`  |  **User story:** US10
 - **Input:** as Bob Creator (bob); path /api/v1/campaigns/1/content; query {"status": "rejected"}
 - **Expected:** HTTP 200; 0.platform = "linkedin"; 0.rejection_reason = "Wording is off-brand."
-- **Actual:** HTTP 200 [{"id": 2, "brief_id": 1, "campaign_id": 1, "platform": "linkedin", "status": "rejected", "created_by": "38f5de85-59a9-4607-a82e-ef0566cf034c", "created_at": "2026-11-24T18:35:56.146334", "updated_at": "2026-11-24T18:35:56.153164", "current_version": {"id": 2, "version_no": 1, "body": "Spring Compost Kit: what urban gardeners should know.\n\nEasy, odour-free, made from recycled material\n\nKey terms: organic, sustain ...(truncated)
+- **Actual:** HTTP 200 [{"id": 2, "brief_id": 1, "campaign_id": 1, "platform": "linkedin", "status": "rejected", "created_by": "8d083176-4dda-4c56-a2a4-aa8ceab06ed7", "created_at": "2026-11-27T18:08:10.250506", "updated_at": "2026-11-27T18:08:10.261904", "current_version": {"id": 2, "version_no": 1, "body": "Spring Compost Kit: what urban gardeners should know.\n\nEasy, odour-free, made from recycled material\n\nKey terms: organic, sustain ...(truncated)
 
 ### TC-087 - two pending pieces  `PASS`
 - **API:** `GET /api/v1/campaigns/{campaign_id}/content`
@@ -532,7 +532,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/campaigns/{campaign_id}/content`  |  **User story:** US10
 - **Input:** as Bob Creator (bob); path /api/v1/campaigns/1/content; query {"platform": "instagram"}
 - **Expected:** HTTP 200; 0.platform = "instagram"
-- **Actual:** HTTP 200 [{"id": 4, "brief_id": 1, "campaign_id": 1, "platform": "instagram", "status": "pending_review", "created_by": "2e10e825-1232-4ac4-965e-3bc818a48bd0", "created_at": "2026-11-24T18:35:56.199017", "updated_at": "2026-11-24T18:35:56.199361", "current_version": {"id": 4, "version_no": 1, "body": "Spring Compost Kit | Easy, odour-free, made from recycled material\n\n#spring #brand #campaign", "creative_suggestion": "Brigh ...(truncated)
+- **Actual:** HTTP 200 [{"id": 4, "brief_id": 1, "campaign_id": 1, "platform": "instagram", "status": "pending_review", "created_by": "932beadc-acd6-442d-a00f-b513027c7b1f", "created_at": "2026-11-27T18:08:10.339740", "updated_at": "2026-11-27T18:08:10.340311", "current_version": {"id": 4, "version_no": 1, "body": "Spring Compost Kit | Easy, odour-free, made from recycled material\n\n#spring #brand #campaign", "creative_suggestion": "Brigh ...(truncated)
 
 ### TC-089 - one instagram piece  `PASS`
 - **API:** `GET /api/v1/campaigns/{campaign_id}/content`
@@ -556,7 +556,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US6
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/1
 - **Expected:** HTTP 200; brief.topic = "Spring Compost Kit"; brief.key_messages = <present>; versions.0.version_no = 1; current_version.version_no = 1
-- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "5767683a-73eb-4285-abd1-8651f5288c0a", "created_at": "2026-11-24T18:35:56.320390", "updated_at": "2026-11-24T18:35:56.320745", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made  ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "c4f3ff34-21e0-44f6-9f94-29a9be8c0572", "created_at": "2026-11-27T18:08:10.549293", "updated_at": "2026-11-27T18:08:10.549894", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made  ...(truncated)
 
 ### TC-093 - Outsider gets 404 for a piece  `PASS`
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US6
@@ -573,14 +573,14 @@ Each case lists the request that was sent, what we expected and what the API act
 ### TC-095 - An edit is saved as a new human_edit version  `PASS`
 - **API:** `PATCH /api/v1/content/{piece_id}`  |  **User story:** US6, US13
 - **Input:** as Bob Creator (bob); path /api/v1/content/1; body {"body": "My improved blog text"}
-- **Expected:** HTTP 200; status = "pending_review"; current_version.version_no = 2; current_version.origin = "human_edit"; current_version.body = "My improved blog text"; current_version.created_by = "a77067bf-fc38-4809-bfca-4fcdf2068d92"
-- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "a77067bf-fc38-4809-bfca-4fcdf2068d92", "created_at": "2026-11-24T18:35:56.446460", "updated_at": "2026-11-24T18:35:56.451005", "current_version": {"id": 5, "version_no": 2, "body": "My improved blog text", "creative_suggestion": null, "origin": "human_edit", "model_name": null, "flags": null, "created_by": "a7706 ...(truncated)
+- **Expected:** HTTP 200; status = "pending_review"; current_version.version_no = 2; current_version.origin = "human_edit"; current_version.body = "My improved blog text"; current_version.created_by = "c84555cd-f005-4f49-a7c5-910182ab2e9f"
+- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "c84555cd-f005-4f49-a7c5-910182ab2e9f", "created_at": "2026-11-27T18:08:10.766676", "updated_at": "2026-11-27T18:08:10.775164", "current_version": {"id": 5, "version_no": 2, "body": "My improved blog text", "creative_suggestion": null, "origin": "human_edit", "model_name": null, "flags": null, "attempt_no": 1, "ch ...(truncated)
 
 ### TC-096 - Editing an approved piece sends it back to pending review  `PASS`
 - **API:** `PATCH /api/v1/content/{piece_id}`  |  **User story:** US6
 - **Input:** as Bob Creator (bob); path /api/v1/content/1; body {"body": "Changed after approval"}
 - **Expected:** HTTP 200; status = "pending_review"; current_version.version_no = 2
-- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "1127ce18-a196-43e0-bde6-4b94084cc8f7", "created_at": "2026-11-24T18:35:56.489563", "updated_at": "2026-11-24T18:35:56.497141", "current_version": {"id": 5, "version_no": 2, "body": "Changed after approval", "creative_suggestion": null, "origin": "human_edit", "model_name": null, "flags": null, "created_by": "1127 ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "989a6ef6-9d67-4fd6-813f-824465b50ff5", "created_at": "2026-11-27T18:08:10.857962", "updated_at": "2026-11-27T18:08:10.874659", "current_version": {"id": 5, "version_no": 2, "body": "Changed after approval", "creative_suggestion": null, "origin": "human_edit", "model_name": null, "flags": null, "attempt_no": 1, "c ...(truncated)
 
 ### TC-097 - Edit with an empty body is refused  `PASS`
 - **API:** `PATCH /api/v1/content/{piece_id}`  |  **User story:** US6
@@ -604,7 +604,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US11
 - **Input:** as Bob Creator (bob); path /api/v1/content/1
 - **Expected:** HTTP 200; status = "pending_review"
-- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "9738dff9-3324-4b16-b547-ece03dea1b76", "created_at": "2026-11-24T18:35:56.620538", "updated_at": "2026-11-24T18:35:56.620884", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made  ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "686e61ea-d31b-4340-8abc-6281c73a9a5e", "created_at": "2026-11-27T18:08:11.094940", "updated_at": "2026-11-27T18:08:11.095646", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made  ...(truncated)
 
 ### TC-101 - Confirmed delete hides the piece; versions and log are kept  `PASS`
 - **API:** `DELETE /api/v1/content/{piece_id}`  |  **User story:** US11, US13
@@ -645,20 +645,20 @@ Each case lists the request that was sent, what we expected and what the API act
 ### TC-107 - Any member can comment on a piece  `PASS`
 - **API:** `POST /api/v1/content/{piece_id}/comments`  |  **User story:** US6, US8
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/1/comments; body {"body": "Please cite the source."}
-- **Expected:** HTTP 201; body = "Please cite the source."; author_name = "Carol Reviewer"; user_id = "36a49c34-589e-4b45-a0e1-94eea39780e6"
-- **Actual:** HTTP 201 {"id": 1, "piece_id": 1, "user_id": "36a49c34-589e-4b45-a0e1-94eea39780e6", "author_name": "Carol Reviewer", "body": "Please cite the source.", "created_at": "2026-11-24T18:35:56.756001Z"}
+- **Expected:** HTTP 201; body = "Please cite the source."; author_name = "Carol Reviewer"; user_id = "9676fe33-16c6-4fa0-b6b3-c5c65f101b8a"
+- **Actual:** HTTP 201 {"id": 1, "piece_id": 1, "user_id": "9676fe33-16c6-4fa0-b6b3-c5c65f101b8a", "author_name": "Carol Reviewer", "body": "Please cite the source.", "created_at": "2026-11-27T18:08:11.332963Z"}
 
 ### TC-108 - Any member can comment on a piece  `PASS`
 - **API:** `POST /api/v1/content/{piece_id}/comments`  |  **User story:** US6, US8
 - **Input:** as Bob Creator (bob); path /api/v1/content/1/comments; body {"body": "Added in the next draft."}
 - **Expected:** HTTP 201
-- **Actual:** HTTP 201 {"id": 2, "piece_id": 1, "user_id": "15cae560-e7bf-4d3c-8c9a-b1a644986430", "author_name": "Bob Creator", "body": "Added in the next draft.", "created_at": "2026-11-24T18:35:56.758190Z"}
+- **Actual:** HTTP 201 {"id": 2, "piece_id": 1, "user_id": "72665489-2c0d-4971-aeb4-3559256babfe", "author_name": "Bob Creator", "body": "Added in the next draft.", "created_at": "2026-11-27T18:08:11.337357Z"}
 
 ### TC-109 - Any member can comment on a piece  `PASS`
 - **API:** `GET /api/v1/content/{piece_id}/comments`  |  **User story:** US6, US8
 - **Input:** as Dave BrandManager (dave); path /api/v1/content/1/comments
 - **Expected:** HTTP 200; 0.author_name = "Carol Reviewer"; 1.author_name = "Bob Creator"
-- **Actual:** HTTP 200 [{"id": 1, "piece_id": 1, "user_id": "36a49c34-589e-4b45-a0e1-94eea39780e6", "author_name": "Carol Reviewer", "body": "Please cite the source.", "created_at": "2026-11-24T18:35:56.756001"}, {"id": 2, "piece_id": 1, "user_id": "15cae560-e7bf-4d3c-8c9a-b1a644986430", "author_name": "Bob Creator", "body": "Added in the next draft.", "created_at": "2026-11-24T18:35:56.758190"}]
+- **Actual:** HTTP 200 [{"id": 1, "piece_id": 1, "user_id": "9676fe33-16c6-4fa0-b6b3-c5c65f101b8a", "author_name": "Carol Reviewer", "body": "Please cite the source.", "created_at": "2026-11-27T18:08:11.332963"}, {"id": 2, "piece_id": 1, "user_id": "72665489-2c0d-4971-aeb4-3559256babfe", "author_name": "Bob Creator", "body": "Added in the next draft.", "created_at": "2026-11-27T18:08:11.337357"}]
 
 ### TC-110 - Blank comment is refused  `PASS`
 - **API:** `POST /api/v1/content/{piece_id}/comments`  |  **User story:** US6
@@ -694,7 +694,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `POST /api/v1/briefs/{brief_id}/generate`  |  **User story:** US3
 - **Input:** as Bob Creator (bob); path /api/v1/briefs/1/generate
 - **Expected:** HTTP 201; job.status = "done"; job.error_message = null; pieces.0.platform = "blog"; pieces.0.status = "pending_review"; pieces.0.current_version.version_no = 1; pieces.0.current_version.origin = "ai_generated"; pieces.3.platform = "instagram"
-- **Actual:** HTTP 201 {"job": {"id": 1, "brief_id": 1, "platform": null, "status": "done", "error_message": null, "feedback_note": null, "created_at": "2026-11-24T18:35:56.936100Z", "finished_at": "2026-11-24T18:35:56.937865Z"}, "pieces": [{"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "261d002d-e27f-454a-87a1-3e1c22305094", "created_at": "2026-11-24T18:35:56.936808Z", "updated_at" ...(truncated)
+- **Actual:** HTTP 201 {"job": {"id": 1, "brief_id": 1, "platform": null, "status": "done", "error_message": null, "feedback_note": null, "input_tokens": null, "output_tokens": null, "cost_usd": null, "created_at": "2026-11-27T18:08:11.670206Z", "finished_at": "2026-11-27T18:08:11.672895Z"}, "pieces": [{"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "b8855924-1726-46fb-8c86-2e38d917c ...(truncated)
 
 ### TC-116 - four pieces created  `PASS`
 - **API:** `POST /api/v1/briefs/{brief_id}/generate`
@@ -706,19 +706,19 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US3
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/4
 - **Expected:** HTTP 200; current_version.creative_suggestion = <present>; platform = "instagram"
-- **Actual:** HTTP 200 {"id": 4, "brief_id": 1, "campaign_id": 1, "platform": "instagram", "status": "pending_review", "created_by": "583bb54b-0a85-4aa6-8baa-d876dcf67d4d", "created_at": "2026-11-24T18:35:56.976655", "updated_at": "2026-11-24T18:35:56.977009", "current_version": {"id": 4, "version_no": 1, "body": "Spring Compost Kit | Easy, odour-free, made from recycled material\n\n#spring #brand #campaign", "creative_suggestion": "Bright ...(truncated)
+- **Actual:** HTTP 200 {"id": 4, "brief_id": 1, "campaign_id": 1, "platform": "instagram", "status": "pending_review", "created_by": "d6e1f3c0-d036-4b68-8f19-190cf3adb9ff", "created_at": "2026-11-27T18:08:11.740893", "updated_at": "2026-11-27T18:08:11.741475", "current_version": {"id": 4, "version_no": 1, "body": "Spring Compost Kit | Easy, odour-free, made from recycled material\n\n#spring #brand #campaign", "creative_suggestion": "Bright ...(truncated)
 
 ### TC-118 - Generation is fed the brand's preferred terms  `PASS`
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US3, US5
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/1
 - **Expected:** HTTP 200; current_version.body = contains 'organic'
-- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "0fb5b604-13f4-4094-a180-f57a98be06f2", "created_at": "2026-11-24T18:35:57.016574", "updated_at": "2026-11-24T18:35:57.016906", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made  ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "268909e3-8b8b-4165-a5ad-f4e06cbb7220", "created_at": "2026-11-27T18:08:11.811417", "updated_at": "2026-11-27T18:08:11.812019", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made  ...(truncated)
 
 ### TC-119 - Only the platforms in the brief are generated  `PASS`
 - **API:** `POST /api/v1/briefs/{brief_id}/generate`  |  **User story:** US3, US1
 - **Input:** as Bob Creator (bob); path /api/v1/briefs/1/generate
 - **Expected:** HTTP 201; pieces.0.platform = "facebook"
-- **Actual:** HTTP 201 {"job": {"id": 1, "brief_id": 1, "platform": null, "status": "done", "error_message": null, "feedback_note": null, "created_at": "2026-11-24T18:35:57.057353Z", "finished_at": "2026-11-24T18:35:57.058003Z"}, "pieces": [{"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "facebook", "status": "pending_review", "created_by": "46d9ed4d-d13e-4fbb-8fa9-af0a49b1b6c1", "created_at": "2026-11-24T18:35:57.057767Z", "updated ...(truncated)
+- **Actual:** HTTP 201 {"job": {"id": 1, "brief_id": 1, "platform": null, "status": "done", "error_message": null, "feedback_note": null, "input_tokens": null, "output_tokens": null, "cost_usd": null, "created_at": "2026-11-27T18:08:12.011573Z", "finished_at": "2026-11-27T18:08:12.014558Z"}, "pieces": [{"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "facebook", "status": "pending_review", "created_by": "c6d6c9be-b348-41ea-9538-c4bd7 ...(truncated)
 
 ### TC-120 - exactly one piece  `PASS`
 - **API:** `POST /api/v1/briefs/{brief_id}/generate`
@@ -772,13 +772,13 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/briefs/{brief_id}`  |  **User story:** US3
 - **Input:** as Bob Creator (bob); path /api/v1/briefs/1
 - **Expected:** HTTP 200; status = "draft"
-- **Actual:** HTTP 200 {"id": 1, "campaign_id": 1, "created_by": "3c4f9a55-c903-4d2a-b28a-d1ee59a6fe33", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog", "linkedin", "facebook", "instagram"], "status": "draft", "created_at ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "campaign_id": 1, "created_by": "965f9edc-2c40-4914-b80c-cccab83ec853", "topic": "Spring Compost Kit", "objective": "Drive pre-orders of the compost kit", "target_audience": "urban gardeners", "key_messages": "Easy, odour-free, made from recycled material", "tone": null, "effective_tone": "warm, practical, no jargon", "platforms": ["blog", "linkedin", "facebook", "instagram"], "status": "draft", "created_at ...(truncated)
 
 ### TC-129 - AI failure returns 502, saves no piece, keeps the brief editable and allows a retry  `PASS`
 - **API:** `POST /api/v1/briefs/{brief_id}/generate`  |  **User story:** US3
 - **Input:** as Bob Creator (bob); path /api/v1/briefs/1/generate
 - **Expected:** HTTP 201; job.status = "done"
-- **Actual:** HTTP 201 {"job": {"id": 2, "brief_id": 1, "platform": null, "status": "done", "error_message": null, "feedback_note": null, "created_at": "2026-11-24T18:35:57.285907Z", "finished_at": "2026-11-24T18:35:57.287453Z"}, "pieces": [{"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "3c4f9a55-c903-4d2a-b28a-d1ee59a6fe33", "created_at": "2026-11-24T18:35:57.286369Z", "updated_at" ...(truncated)
+- **Actual:** HTTP 201 {"job": {"id": 2, "brief_id": 1, "platform": null, "status": "done", "error_message": null, "feedback_note": null, "input_tokens": null, "output_tokens": null, "cost_usd": null, "created_at": "2026-11-27T18:08:12.428249Z", "finished_at": "2026-11-27T18:08:12.430909Z"}, "pieces": [{"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "965f9edc-2c40-4914-b80c-cccab83ec ...(truncated)
 
 ### TC-130 - log contains generation_failed  `PASS`
 - **API:** `GET /api/v1/campaigns/{campaign_id}/activity`
@@ -790,7 +790,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/campaigns/{campaign_id}/content`  |  **User story:** US6
 - **Input:** as Carol Reviewer (carol); path /api/v1/campaigns/1/content; query {"status": "pending_review"}
 - **Expected:** HTTP 200; 0.status = "pending_review"
-- **Actual:** HTTP 200 [{"id": 4, "brief_id": 1, "campaign_id": 1, "platform": "instagram", "status": "pending_review", "created_by": "7588d482-2771-489f-b9f2-0425d84cb0fa", "created_at": "2026-11-24T18:35:57.365029", "updated_at": "2026-11-24T18:35:57.365387", "current_version": {"id": 4, "version_no": 1, "body": "Spring Compost Kit | Easy, odour-free, made from recycled material\n\n#spring #brand #campaign", "creative_suggestion": "Brigh ...(truncated)
+- **Actual:** HTTP 200 [{"id": 4, "brief_id": 1, "campaign_id": 1, "platform": "instagram", "status": "pending_review", "created_by": "8f7fe931-fd4e-46d7-9e8b-c35cb2f6bbf2", "created_at": "2026-11-27T18:08:12.565967", "updated_at": "2026-11-27T18:08:12.566533", "current_version": {"id": 4, "version_no": 1, "body": "Spring Compost Kit | Easy, odour-free, made from recycled material\n\n#spring #brand #campaign", "creative_suggestion": "Brigh ...(truncated)
 
 ### TC-132 - four pending pieces  `PASS`
 - **API:** `GET /api/v1/campaigns/{campaign_id}/content`
@@ -802,13 +802,13 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `POST /api/v1/content/{piece_id}/approve`  |  **User story:** US7
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/1/approve
 - **Expected:** HTTP 200; status = "approved"
-- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "approved", "created_by": "51310f6d-b480-45ae-93dc-fbde4d7eb4c2", "created_at": "2026-11-24T18:35:57.404537", "updated_at": "2026-11-24T18:35:57.408691", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made from r ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "approved", "created_by": "1b065917-c89c-4627-acec-40cee42bab20", "created_at": "2026-11-27T18:08:12.634483", "updated_at": "2026-11-27T18:08:12.642048", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made from r ...(truncated)
 
 ### TC-134 - Reviewer approves a pending piece  `PASS`
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US7
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/1
-- **Expected:** HTTP 200; reviews.0.decision = "approved"; reviews.0.reviewer_id = "e9524b28-8f64-4b37-86d4-c2179ac84739"; reviews.0.created_at = <present>; reviews.0.version_no = 1
-- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "approved", "created_by": "51310f6d-b480-45ae-93dc-fbde4d7eb4c2", "created_at": "2026-11-24T18:35:57.404537", "updated_at": "2026-11-24T18:35:57.408691", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made from r ...(truncated)
+- **Expected:** HTTP 200; reviews.0.decision = "approved"; reviews.0.reviewer_id = "4f7b73c1-f9de-454b-8581-5cb5a437dc56"; reviews.0.created_at = <present>; reviews.0.version_no = 1
+- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "approved", "created_by": "1b065917-c89c-4627-acec-40cee42bab20", "created_at": "2026-11-27T18:08:12.634483", "updated_at": "2026-11-27T18:08:12.642048", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made from r ...(truncated)
 
 ### TC-135 - A non-reviewer (creator) trying to approve gets 403  `PASS`
 - **API:** `POST /api/v1/content/{piece_id}/approve`  |  **User story:** US7
@@ -844,7 +844,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `POST /api/v1/content/{piece_id}/approve`  |  **User story:** US7
 - **Input:** as Frank Reviewer (frank); path /api/v1/content/1/approve
 - **Expected:** HTTP 200; status = "approved"
-- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "approved", "created_by": "d68ca19f-6e06-40be-96f4-11bfd1a250b5", "created_at": "2026-11-24T18:35:57.614086", "updated_at": "2026-11-24T18:35:57.622992", "current_version": {"id": 5, "version_no": 2, "body": "Carol's rewrite of the blog", "creative_suggestion": null, "origin": "human_edit", "model_name": null, "flags": null, "created_by": "fd06f ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "approved", "created_by": "c4e5fd0e-2cee-4639-b737-c84876d2fe3b", "created_at": "2026-11-27T18:08:13.098593", "updated_at": "2026-11-27T18:08:13.113027", "current_version": {"id": 5, "version_no": 2, "body": "Carol's rewrite of the blog", "creative_suggestion": null, "origin": "human_edit", "model_name": null, "flags": null, "attempt_no": 1, "ch ...(truncated)
 
 ### TC-141 - Approving version 1 after it was superseded by version 2 is refused  `PASS`
 - **API:** `POST /api/v1/content/{piece_id}/approve`  |  **User story:** US7
@@ -856,7 +856,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `POST /api/v1/content/{piece_id}/approve`  |  **User story:** US7
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/1/approve; body {"version_no": 1}
 - **Expected:** HTTP 200; status = "approved"
-- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "approved", "created_by": "c6251f38-6107-407f-bd63-42410b423f79", "created_at": "2026-11-24T18:35:57.703846", "updated_at": "2026-11-24T18:35:57.708306", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made from r ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "approved", "created_by": "cb5ebd94-4134-4459-a321-19e35daf4b38", "created_at": "2026-11-27T18:08:13.251290", "updated_at": "2026-11-27T18:08:13.258303", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made from r ...(truncated)
 
 ### TC-143 - Approving an unknown piece returns 404  `PASS`
 - **API:** `POST /api/v1/content/{piece_id}/approve`  |  **User story:** US7
@@ -868,13 +868,13 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `POST /api/v1/content/{piece_id}/reject`  |  **User story:** US8
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/2/reject; body {"reason": "Claims about odour are not supported by the source."}
 - **Expected:** HTTP 200; status = "rejected"; rejection_reason = "Claims about odour are not supported by the source."
-- **Actual:** HTTP 200 {"id": 2, "brief_id": 1, "campaign_id": 1, "platform": "linkedin", "status": "rejected", "created_by": "6bbd8fda-48ba-44e0-8df1-31bdbbe8a3b5", "created_at": "2026-11-24T18:35:57.779506", "updated_at": "2026-11-24T18:35:57.783419", "current_version": {"id": 2, "version_no": 1, "body": "Spring Compost Kit: what urban gardeners should know.\n\nEasy, odour-free, made from recycled material\n\nKey terms: organic, sustaina ...(truncated)
+- **Actual:** HTTP 200 {"id": 2, "brief_id": 1, "campaign_id": 1, "platform": "linkedin", "status": "rejected", "created_by": "7c0b709d-4032-48c3-b396-01a92757a028", "created_at": "2026-11-27T18:08:13.381475", "updated_at": "2026-11-27T18:08:13.388067", "current_version": {"id": 2, "version_no": 1, "body": "Spring Compost Kit: what urban gardeners should know.\n\nEasy, odour-free, made from recycled material\n\nKey terms: organic, sustaina ...(truncated)
 
 ### TC-145 - Reviewer rejects a piece with a reason; the creator can read it  `PASS`
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US8
 - **Input:** as Bob Creator (bob); path /api/v1/content/2
 - **Expected:** HTTP 200; status = "rejected"; rejection_reason = "Claims about odour are not supported by the source."
-- **Actual:** HTTP 200 {"id": 2, "brief_id": 1, "campaign_id": 1, "platform": "linkedin", "status": "rejected", "created_by": "6bbd8fda-48ba-44e0-8df1-31bdbbe8a3b5", "created_at": "2026-11-24T18:35:57.779506", "updated_at": "2026-11-24T18:35:57.783419", "current_version": {"id": 2, "version_no": 1, "body": "Spring Compost Kit: what urban gardeners should know.\n\nEasy, odour-free, made from recycled material\n\nKey terms: organic, sustaina ...(truncated)
+- **Actual:** HTTP 200 {"id": 2, "brief_id": 1, "campaign_id": 1, "platform": "linkedin", "status": "rejected", "created_by": "7c0b709d-4032-48c3-b396-01a92757a028", "created_at": "2026-11-27T18:08:13.381475", "updated_at": "2026-11-27T18:08:13.388067", "current_version": {"id": 2, "version_no": 1, "body": "Spring Compost Kit: what urban gardeners should know.\n\nEasy, odour-free, made from recycled material\n\nKey terms: organic, sustaina ...(truncated)
 
 ### TC-146 - Rejection without a reason is refused  `PASS`
 - **API:** `POST /api/v1/content/{piece_id}/reject`  |  **User story:** US8
@@ -916,19 +916,19 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US8
 - **Input:** as Bob Creator (bob); path /api/v1/content/2
 - **Expected:** HTTP 200; versions.0.version_no = 1; reviews.0.decision = "rejected"
-- **Actual:** HTTP 200 {"id": 2, "brief_id": 1, "campaign_id": 1, "platform": "linkedin", "status": "rejected", "created_by": "bf205e1e-bfd9-4638-af4e-e5461e77a141", "created_at": "2026-11-24T18:35:58.076429", "updated_at": "2026-11-24T18:35:58.080260", "current_version": {"id": 2, "version_no": 1, "body": "Spring Compost Kit: what urban gardeners should know.\n\nEasy, odour-free, made from recycled material\n\nKey terms: organic, sustaina ...(truncated)
+- **Actual:** HTTP 200 {"id": 2, "brief_id": 1, "campaign_id": 1, "platform": "linkedin", "status": "rejected", "created_by": "01dd8fad-e6f5-42a0-a7f5-49e74f6ff40b", "created_at": "2026-11-27T18:08:13.880027", "updated_at": "2026-11-27T18:08:13.886542", "current_version": {"id": 2, "version_no": 1, "body": "Spring Compost Kit: what urban gardeners should know.\n\nEasy, odour-free, made from recycled material\n\nKey terms: organic, sustaina ...(truncated)
 
 ### TC-153 - Request changes yields one revised version and returns the piece to pending review  `PASS`
 - **API:** `POST /api/v1/content/{piece_id}/request-changes`  |  **User story:** US9
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/3/request-changes; body {"feedback": "Make the call to action stronger."}
 - **Expected:** HTTP 200; status = "pending_review"; current_version.version_no = 2; current_version.origin = "regeneration"; current_version.body = contains 'stronger'
-- **Actual:** HTTP 200 {"id": 3, "brief_id": 1, "campaign_id": 1, "platform": "facebook", "status": "pending_review", "created_by": "252895d2-077e-4459-bd30-0e84ea70b710", "created_at": "2026-11-24T18:35:58.120151", "updated_at": "2026-11-24T18:35:58.124557", "current_version": {"id": 5, "version_no": 2, "body": "Spring Compost Kit - Easy, odour-free, made from recycled material Key terms: organic, sustainable.\n\nLearn more today!\n\n[Rev ...(truncated)
+- **Actual:** HTTP 200 {"id": 3, "brief_id": 1, "campaign_id": 1, "platform": "facebook", "status": "pending_review", "created_by": "497ef217-877d-40f2-b6db-2b11f0e82dfb", "created_at": "2026-11-27T18:08:13.952918", "updated_at": "2026-11-27T18:08:13.960167", "current_version": {"id": 5, "version_no": 2, "body": "Spring Compost Kit - Easy, odour-free, made from recycled material Key terms: organic, sustainable.\n\nLearn more today!\n\n[Rev ...(truncated)
 
 ### TC-154 - Version 1 and the feedback review are kept  `PASS`
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US9
 - **Input:** as Bob Creator (bob); path /api/v1/content/3
 - **Expected:** HTTP 200; versions.0.version_no = 1; versions.1.version_no = 2; reviews.0.decision = "changes_requested"; reviews.0.feedback = "Make the call to action stronger."
-- **Actual:** HTTP 200 {"id": 3, "brief_id": 1, "campaign_id": 1, "platform": "facebook", "status": "pending_review", "created_by": "ab1688a5-eec5-42df-81c8-3481dcdf322d", "created_at": "2026-11-24T18:35:58.162571", "updated_at": "2026-11-24T18:35:58.166856", "current_version": {"id": 5, "version_no": 2, "body": "Spring Compost Kit - Easy, odour-free, made from recycled material Key terms: organic, sustainable.\n\nLearn more today!\n\n[Rev ...(truncated)
+- **Actual:** HTTP 200 {"id": 3, "brief_id": 1, "campaign_id": 1, "platform": "facebook", "status": "pending_review", "created_by": "5a4ad586-2b45-4544-aabb-8ebefbc042f8", "created_at": "2026-11-27T18:08:14.024204", "updated_at": "2026-11-27T18:08:14.031349", "current_version": {"id": 5, "version_no": 2, "body": "Spring Compost Kit - Easy, odour-free, made from recycled material Key terms: organic, sustainable.\n\nLearn more today!\n\n[Rev ...(truncated)
 
 ### TC-155 - two versions exist  `PASS`
 - **API:** `GET /api/v1/content/{piece_id}`
@@ -940,7 +940,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US9
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/1
 - **Expected:** HTTP 200; current_version.version_no = 1; status = "pending_review"
-- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "3148aed5-3b07-4cf6-bb4f-51df65704868", "created_at": "2026-11-24T18:35:58.206632", "updated_at": "2026-11-24T18:35:58.206972", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made  ...(truncated)
+- **Actual:** HTTP 200 {"id": 1, "brief_id": 1, "campaign_id": 1, "platform": "blog", "status": "pending_review", "created_by": "f17df900-4d5e-4a13-86cf-84c0de950716", "created_at": "2026-11-27T18:08:14.097059", "updated_at": "2026-11-27T18:08:14.097684", "current_version": {"id": 1, "version_no": 1, "body": "# Spring Compost Kit\n\nIntro: Drive pre-orders of the compost kit\n\n## Why it matters for urban gardeners\nEasy, odour-free, made  ...(truncated)
 
 ### TC-157 - Request changes without feedback is refused  `PASS`
 - **API:** `POST /api/v1/content/{piece_id}/request-changes`  |  **User story:** US9
@@ -964,7 +964,7 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `GET /api/v1/content/{piece_id}`  |  **User story:** US9
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/3
 - **Expected:** HTTP 200; status = "pending_review"; current_version.version_no = 1; reviews = []
-- **Actual:** HTTP 200 {"id": 3, "brief_id": 1, "campaign_id": 1, "platform": "facebook", "status": "pending_review", "created_by": "3552ae16-f63c-4221-9cdb-625b07c5e84e", "created_at": "2026-11-24T18:35:58.332692", "updated_at": "2026-11-24T18:35:58.332932", "current_version": {"id": 3, "version_no": 1, "body": "Spring Compost Kit - Easy, odour-free, made from recycled material Key terms: organic, sustainable.\n\nLearn more today!", "crea ...(truncated)
+- **Actual:** HTTP 200 {"id": 3, "brief_id": 1, "campaign_id": 1, "platform": "facebook", "status": "pending_review", "created_by": "df14f5cf-6808-4e6f-b538-44b29428c505", "created_at": "2026-11-27T18:08:14.305869", "updated_at": "2026-11-27T18:08:14.306251", "current_version": {"id": 3, "version_no": 1, "body": "Spring Compost Kit - Easy, odour-free, made from recycled material Key terms: organic, sustainable.\n\nLearn more today!", "crea ...(truncated)
 
 ### TC-161 - Feedback on an outdated version is refused  `PASS`
 - **API:** `POST /api/v1/content/{piece_id}/request-changes`  |  **User story:** US9
@@ -976,4 +976,4 @@ Each case lists the request that was sent, what we expected and what the API act
 - **API:** `POST /api/v1/content/{piece_id}/approve`  |  **User story:** US9, US7
 - **Input:** as Carol Reviewer (carol); path /api/v1/content/3/approve; body {"version_no": 2}
 - **Expected:** HTTP 200; status = "approved"; current_version.version_no = 2
-- **Actual:** HTTP 200 {"id": 3, "brief_id": 1, "campaign_id": 1, "platform": "facebook", "status": "approved", "created_by": "b720d5ca-f228-4092-95be-fdcff77af388", "created_at": "2026-11-24T18:35:58.418839", "updated_at": "2026-11-24T18:35:58.426327", "current_version": {"id": 5, "version_no": 2, "body": "Spring Compost Kit - Easy, odour-free, made from recycled material Key terms: organic, sustainable.\n\nLearn more today!\n\n[Revised a ...(truncated)
+- **Actual:** HTTP 200 {"id": 3, "brief_id": 1, "campaign_id": 1, "platform": "facebook", "status": "approved", "created_by": "8ba5015e-d7f2-4ec0-8283-902cf35ddd0d", "created_at": "2026-11-27T18:08:14.449618", "updated_at": "2026-11-27T18:08:14.461690", "current_version": {"id": 5, "version_no": 2, "body": "Spring Compost Kit - Easy, odour-free, made from recycled material Key terms: organic, sustainable.\n\nLearn more today!\n\n[Revised a ...(truncated)

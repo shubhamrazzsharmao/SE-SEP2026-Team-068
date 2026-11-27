@@ -1,14 +1,25 @@
 """Content piece, version and generation views; the edit request."""
 import uuid
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
+from decimal import Decimal
 from pydantic import BaseModel, Field
 
 from app.enums import ContentStatus, JobStatus, Platform, VersionOrigin
 from app.schemas.brief import BriefOut
 from app.schemas.common import ORM, Text
 from app.schemas.review import ReviewOut
+
+
+class VersionCheckOut(ORM):
+    id: int
+    check_name: str
+    check_type: Literal["code", "llm"]
+    passed: bool
+    score: Optional[Decimal]
+    detail: Optional[str]
+    created_at: datetime
 
 
 class VersionOut(ORM):
@@ -19,6 +30,9 @@ class VersionOut(ORM):
     origin: VersionOrigin
     model_name: Optional[str]
     flags: Optional[dict[str, Any]]
+    attempt_no: int
+    check_outcome: Optional[Literal["passed", "auto_rejected", "needs_human"]]
+    checks: list[VersionCheckOut] = Field(default_factory=list)
     created_by: Optional[uuid.UUID]
     created_at: datetime
 
@@ -51,6 +65,9 @@ class JobOut(ORM):
     status: JobStatus
     error_message: Optional[str]
     feedback_note: Optional[str]
+    input_tokens: Optional[int]
+    output_tokens: Optional[int]
+    cost_usd: Optional[Decimal]
     created_at: datetime
     finished_at: Optional[datetime]
 

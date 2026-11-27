@@ -1,9 +1,10 @@
 """Briefs, their source material, and AI generation jobs."""
 import uuid
+from decimal import Decimal
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.enums import BriefStatus, JobStatus, Platform, SourceKind
@@ -52,5 +53,8 @@ class GenerationJob(Base):
     status: Mapped[JobStatus] = mapped_column(pgenum(JobStatus, "job_status"), default=JobStatus.queued)
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     feedback_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    input_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    output_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    cost_usd: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 6), nullable=True)
     created_at: Mapped[datetime] = timestamp()
     finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

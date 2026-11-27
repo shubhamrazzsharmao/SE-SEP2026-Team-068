@@ -100,9 +100,13 @@ create table generation_jobs (
   status        job_status   not null default 'queued',
   error_message text,
   feedback_note text,
+  input_tokens  integer,
+  output_tokens integer,
+  cost_usd      numeric(10,6),
   created_at    timestamptz  not null default now(),
   finished_at   timestamptz
 );
+create index idx_jobs_brief on generation_jobs (brief_id);
 
 create table content_pieces (
   id                 serial primary key,
@@ -118,6 +122,7 @@ create table content_pieces (
   unique (brief_id, platform)
 );
 create index content_pieces_campaign_status_idx on content_pieces (campaign_id, status);
+create index idx_pieces_campaign_status on content_pieces (campaign_id, status);
 
 create table content_versions (
   id                  serial primary key,
@@ -130,9 +135,23 @@ create table content_versions (
   prompt_used         text,
   model_name          varchar(100),
   flags               jsonb,
+  attempt_no          integer        not null default 1,
+  check_outcome       text           check (check_outcome in ('passed','auto_rejected','needs_human')),
   created_by          uuid           references users (id),   -- null when produced by AI
   created_at          timestamptz    not null default now(),
   unique (piece_id, version_no)
+);
+create index idx_versions_piece on content_versions (piece_id);
+
+create table version_checks (
+  id         serial primary key,
+  version_id integer     not null references content_versions (id),
+  check_name varchar     not null,
+  check_type varchar     not null check (check_type in ('code','llm')),
+  passed     boolean     not null,
+  score      numeric,
+  detail     text,
+  created_at timestamptz not null default now()
 );
 
 alter table content_pieces
@@ -150,6 +169,7 @@ create table reviews (
   created_at  timestamptz     not null default now()
 );
 create index reviews_version_idx on reviews (version_id);
+create index idx_reviews_version on reviews (version_id);
 
 create table piece_comments (
   id         serial primary key,
@@ -197,3 +217,4 @@ alter table reviews           enable row level security;
 alter table piece_comments    enable row level security;
 alter table activity_logs     enable row level security;
 alter table ideas             enable row level security;
+alter table version_checks     enable row level security;

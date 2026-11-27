@@ -14,6 +14,10 @@ PostgreSQL 18 and compared column-by-column with the SQLAlchemy models (no diffe
 | `brands.preferred_terms/avoided_terms` are `NOT NULL DEFAULT '[]'` | Avoids null checks in the generator. |
 | `timestamp` -> `timestamptz` | Correct handling of time zones. |
 | `briefs.platforms` has a CHECK (JSON array, at least one) | Enforces "at least one platform" in the database as well. |
+| `content_versions.attempt_no` and `check_outcome` added | Tracks which regeneration attempt produced a version and whether quality checks passed, rejected it automatically, or require human review. `check_outcome` is constrained to `passed`, `auto_rejected`, or `needs_human`. |
+| New table `version_checks` | Stores each code/LLM quality check for a content version, including pass/fail, score, detail, type, and timestamp. `check_type` is constrained to `code` or `llm`. |
+| `generation_jobs.input_tokens`, `output_tokens`, and `cost_usd` added | Records LLM usage and estimated cost for generation observability. Cost is stored as `numeric(10,6)`. |
+| Added retrieval indexes for pieces, versions, reviews, and jobs | The `campaign/status`, `piece`, `review version`, and `brief` foreign-key access patterns now have explicit indexes. |
 | Row Level Security enabled on all tables, no policies | The backend connects as the database owner (bypasses RLS) and does all authorisation; Supabase's public REST API (anon key) can read nothing. |
 
 ## Gap in the ER design (needs a team decision for Sprint 2)

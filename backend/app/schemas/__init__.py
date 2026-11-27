@@ -8,13 +8,14 @@ from app.schemas.brand import BrandIn, BrandOut, BrandUpdate
 from app.schemas.brief import BriefIn, BriefOut, BriefUpdate
 from app.schemas.campaign import CampaignIn, CampaignOut, MemberIn, MemberOut
 from app.schemas.comment import CommentIn, CommentOut
-from app.schemas.content import ContentPieceDetail, ContentPieceOut, EditIn, GenerateOut, JobOut, VersionOut
+from app.schemas.content import (ContentPieceDetail, ContentPieceOut, EditIn, GenerateOut,
+                                  JobOut, VersionCheckOut, VersionOut)
 from app.schemas.dashboard import CampaignCounts, DashboardOut, HealthOut, StatusCounts
 from app.schemas.review import ApproveIn, RejectIn, RequestChangesIn, ReviewOut
 from app.schemas.user import UserOut
 
 __all__ = ["ActivityOut", "BrandIn", "BrandOut", "BrandUpdate", "BriefIn", "BriefOut", "BriefUpdate",
            "CampaignIn", "CampaignOut", "MemberIn", "MemberOut", "CommentIn", "CommentOut",
-           "ContentPieceDetail", "ContentPieceOut", "EditIn", "GenerateOut", "JobOut", "VersionOut",
+           "ContentPieceDetail", "ContentPieceOut", "EditIn", "GenerateOut", "JobOut", "VersionCheckOut", "VersionOut",
            "CampaignCounts", "DashboardOut", "HealthOut", "StatusCounts", "ApproveIn", "RejectIn",
            "RequestChangesIn", "ReviewOut", "UserOut"]

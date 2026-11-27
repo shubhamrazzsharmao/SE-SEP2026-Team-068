@@ -1,9 +1,10 @@
 """Content pieces and their append-only versions."""
 import uuid
+from decimal import Decimal
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.enums import ContentStatus, Platform, ReviewDecision, VersionOrigin
@@ -67,8 +68,27 @@ class ContentVersion(Base):
     prompt_used: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     model_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     flags: Mapped[Optional[dict]] = mapped_column(JsonType, nullable=True)
+    attempt_no: Mapped[int] = mapped_column(Integer, default=1)
+    check_outcome: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     created_by: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = timestamp()
 
     piece: Mapped[ContentPiece] = relationship(back_populates="versions")
     reviews: Mapped[list["Review"]] = relationship(back_populates="version")
+    checks: Mapped[list["VersionCheck"]] = relationship(back_populates="version",
+                                                         order_by="VersionCheck.created_at")
+
+
+class VersionCheck(Base):
+    """One code or LLM quality check executed for a content version."""
+    __tablename__ = "version_checks"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    version_id: Mapped[int] = mapped_column(ForeignKey("content_versions.id"))
+    check_name: Mapped[str] = mapped_column(String)
+    check_type: Mapped[str] = mapped_column(String)
+    passed: Mapped[bool] = mapped_column(Boolean)
+    score: Mapped[Optional[Decimal]] = mapped_column(Numeric, nullable=True)
+    detail: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = timestamp()
+
+    version: Mapped[ContentVersion] = relationship(back_populates="checks")
