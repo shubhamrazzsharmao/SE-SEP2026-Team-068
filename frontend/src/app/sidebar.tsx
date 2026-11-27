@@ -58,14 +58,14 @@ export function Sidebar({ workspace, open, onClose }: Props) {
         <details className="group relative mt-6">
           <summary className="flex cursor-pointer list-none items-center gap-3 rounded-xl bg-white/5 px-3 py-2.5 text-sm [&::-webkit-details-marker]:hidden">
             <span className="grid h-7 w-7 place-items-center rounded-md bg-paper text-xs font-bold text-brown">A</span>
-            <span className="font-semibold">All clients</span>
+            <span className="font-semibold">All brand profiles</span>
             <LuChevronsUpDown className="ml-auto opacity-60" size={16} />
           </summary>
           <ul className="absolute left-0 right-0 top-full z-10 mt-2 rounded-xl bg-white p-2 text-ink shadow-xl">
             {workspace.clients.length === 0 && (
               <li>
                 <Link href="/clients" onClick={onClose} className="block rounded-lg px-2 py-2 text-sm hover:bg-paper">
-                  + Add a client
+                  + Add a brand profile
                 </Link>
               </li>
             )}

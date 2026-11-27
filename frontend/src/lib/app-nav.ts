@@ -7,7 +7,7 @@ export type NavItem = { label: string; href: string; icon: IconType; badge?: "re
 // when their endpoints exist (see backend/README.md "Not in Sprint 1").
 export const mainNav: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LuLayoutDashboard },
-  { label: "Clients", href: "/clients", icon: LuUsers },
+  { label: "Brand setup", href: "/clients", icon: LuUsers },
   { label: "Campaigns", href: "/campaigns", icon: LuFolderKanban },
   { label: "Reviews", href: "/reviews", icon: LuClipboardCheck, badge: "reviews" },
 ];

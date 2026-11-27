@@ -27,15 +27,25 @@ const terms = (fd: FormData, key: string) =>
 const json = (body: unknown) => ({ body: JSON.stringify(body) });
 
 // ---------------------------------------------------------------- brands (clients)
-export async function createBrand(_: ActionState, fd: FormData): Promise<ActionState> {
+export async function createBrandProfile(input: {
+  name: string;
+  tone: string;
+  preferredTerms?: string[];
+  avoidedTerms?: string[];
+}): Promise<ActionState> {
   let id: number | undefined;
   const state = await run(async () => {
     const brand = await api<BrandOut>("/brands", {
       method: "POST",
-      ...json({ name: str(fd, "name"), tone: str(fd, "tone"), preferred_terms: terms(fd, "preferred_terms"), avoided_terms: terms(fd, "avoided_terms") }),
+      ...json({
+        name: input.name,
+        tone: input.tone,
+        preferred_terms: input.preferredTerms ?? [],
+        avoided_terms: input.avoidedTerms ?? [],
+      }),
     });
     id = brand.id;
-  });
+  }, "Brand profile saved.");
   if (state.ok && id) redirect(`/clients/${id}`);
   return state;
 }
